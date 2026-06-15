@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>StormDrive — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#0c0c0f; --surface:#13131a; --border:#1e1e2e;
+    --accent:#7c6af7; --accent2:#3ecfb2; --dim:#3a3a52;
+    --muted:#6b6b8a; --text:#e2e2f0; --bright:#ffffff;
+    --red:#ff5f57; --yellow:#febc2e; --green:#28c840;
+  }
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:28px 16px 60px;
+  }
+  .topbar{
+    width:100%; max-width:940px; display:flex; align-items:center;
+    justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;
+  }
+  .back{
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted);
+    text-decoration:none; letter-spacing:.08em; border:1px solid var(--border);
+    padding:8px 14px; border-radius:4px; transition:.2s;
+  }
+  .back:hover{ color:var(--accent2); border-color:var(--accent2); }
+  .repo-link{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2);
+    text-decoration:none; letter-spacing:.06em; border:1px solid rgba(62,207,178,0.25);
+    padding:8px 14px; border-radius:4px; transition:.2s;
+  }
+  .repo-link:hover{ color:var(--bright); border-color:var(--accent2); }
+
+  header{ width:100%; max-width:940px; margin-bottom:24px; }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2);
+    letter-spacing:.15em; text-transform:uppercase; margin-bottom:10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:'';display:inline-block;width:24px;height:1px;background:var(--accent2);}
+  h1{
+    font-family:'JetBrains Mono',monospace; font-size:clamp(22px,4.5vw,36px);
+    font-weight:700; color:var(--bright); letter-spacing:-0.02em; margin-bottom:8px;
+  }
+  .sub{ color:var(--muted); font-size:14px; line-height:1.7; max-width:640px; }
+  .sub em{ color:var(--text); font-style:normal; }
+
+  /* ── Layout ── */
+  .demo-wrap{
+    width:100%; max-width:940px;
+    display:grid; grid-template-columns:1fr 1fr; gap:16px;
+  }
+  @media(max-width:660px){ .demo-wrap{grid-template-columns:1fr;} }
+
+  /* ── Window chrome shell ── */
+  .shell{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; overflow:hidden; display:flex; flex-direction:column;
+    position:relative;
+  }
+  .shell::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); z-index:2;
+  }
+  .chrome-bar{
+    background:#1a1a24; padding:9px 14px; display:flex; align-items:center; gap:8px;
+    border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;}
+  .dot-r{background:var(--red);} .dot-y{background:var(--yellow);} .dot-g{background:var(--green);}
+  .chrome-title{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted);
+    margin-left:6px; letter-spacing:.04em;
+  }
+
+  /* ── Telegram-style header ── */
+  .tg-header{
+    background:#181826; padding:10px 14px;
+    display:flex; align-items:center; gap:10px;
+    border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .tg-avatar{
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700;
+    flex-shrink:0; background:linear-gradient(135deg,var(--accent),#5a48cc);
+  }
+  .tg-info{ flex:1; }
+  .tg-name{ font-size:13px; font-weight:600; color:var(--bright); line-height:1.2; }
+  .tg-status{ font-size:11px; color:var(--accent2); }
+
+  /* ── Chat body ── */
+  .chat-body{
+    flex:1; overflow-y:auto; padding:10px 10px;
+    display:flex; flex-direction:column; gap:5px;
+    min-height:300px; max-height:400px;
+    scrollbar-width:thin; scrollbar-color:var(--dim) transparent;
+  }
+  .chat-body::-webkit-scrollbar{width:4px;}
+  .chat-body::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px;}
+
+  .msg-row{ display:flex; gap:6px; }
+  .msg-row.out{ flex-direction:row-reverse; }
+
+  .bubble{
+    max-width:78%; padding:7px 11px; border-radius:10px;
+    font-size:12.5px; line-height:1.5;
+  }
+  .bubble.in{ background:#1e2230; border-radius:10px 10px 10px 2px; color:var(--text); }
+  .bubble.out{ background:#2a2050; border-radius:10px 10px 2px 10px; color:var(--text); }
+  .bubble.bot{ background:#131f2e; border-radius:10px 10px 10px 2px; color:var(--text); }
+  .bubble .bname{ font-size:10px; font-weight:700; color:var(--accent); margin-bottom:2px; font-family:'JetBrains Mono',monospace; }
+  .bubble .time{ font-size:10px; color:var(--muted); text-align:right; margin-top:3px; }
+
+  .cmd{ color:var(--accent2); font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .val{ color:var(--yellow); font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .ok{ color:var(--green); }
+  .dim{ color:var(--muted); }
+
+  /* file attachment bubble */
+  .file-bubble{
+    background:#1a2236; border:1px solid rgba(62,207,178,0.2);
+    border-radius:8px; padding:8px 10px; display:flex; align-items:center; gap:8px;
+    margin-top:4px;
+  }
+  .file-icon{
+    width:30px; height:30px; border-radius:6px;
+    background:rgba(124,106,247,0.2); display:flex; align-items:center;
+    justify-content:center; font-size:14px; flex-shrink:0;
+  }
+  .file-meta{ flex:1; min-width:0; }
+  .file-name{ font-size:11px; font-weight:600; color:var(--bright); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .file-size{ font-size:10px; color:var(--muted); }
+
+  /* folder listing */
+  .folder-list{ display:flex; flex-direction:column; gap:3px; margin-top:4px; }
+  .folder-item{
+    display:flex; align-items:center; gap:7px; padding:4px 6px;
+    border-radius:4px; background:rgba(255,255,255,0.03); font-size:12px;
+  }
+  .folder-item .fi-icon{ font-size:13px; }
+  .folder-item .fi-name{ color:var(--text); flex:1; }
+  .folder-item .fi-size{ color:var(--muted); font-size:10px; }
+
+  /* ── Right panel ── */
+  .info-panel{ display:flex; flex-direction:column; gap:12px; }
+  .info-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:16px 18px; position:relative; overflow:hidden;
+  }
+  .info-card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+  }
+  .lbl{
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2);
+    letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;
+  }
+  .info-card p{ color:var(--muted); font-size:13px; line-height:1.65; }
+
+  .feature-list{ display:flex; flex-direction:column; gap:6px; }
+  .feat{
+    display:flex; align-items:flex-start; gap:8px; font-size:12.5px; line-height:1.5;
+  }
+  .feat-dot{ color:var(--accent2); font-size:11px; margin-top:2px; flex-shrink:0; }
+  .feat span{ color:var(--muted); }
+  .feat strong{ color:var(--text); font-weight:500; }
+
+  .stat-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12px; padding:5px 0; border-bottom:1px solid var(--border);
+  }
+  .stat-row:last-child{ border-bottom:none; }
+  .stat-row .k{ font-family:'JetBrains Mono',monospace; color:var(--muted); }
+  .stat-row .v{ color:var(--accent2); font-family:'JetBrains Mono',monospace; }
+
+  /* storage bar */
+  .storage-bar-wrap{ margin-top:10px; }
+  .storage-label{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:5px; }
+  .storage-bar{ height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .storage-fill{ height:100%; width:31%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; }
+
+  /* tag pills */
+  .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .tag{
+    font-family:'JetBrains Mono',monospace; font-size:10px;
+    padding:3px 8px; background:var(--border); color:var(--muted);
+    border-radius:2px; letter-spacing:.04em;
+  }
+
+  footer.page-footer{
+    margin-top:40px; width:100%; max-width:940px;
+    border-top:1px solid var(--border); padding-top:16px;
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim);
+    letter-spacing:.06em; text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="index.html">← back</a>
+  <a class="repo-link" href="https://github.com/jishnuharis/StormDrive" target="_blank">→ github.com/jishnuharis/StormDrive</a>
+</div>
+
+<header>
+  <div class="eyebrow">infrastructure · storage · bot</div>
+  <h1>StormDrive</h1>
+  <p class="sub">
+    A private file vault running entirely inside <em>Telegram</em> — unlimited storage with no hosting fees.
+    Full folder tree, search, favourites, move/copy/rename, per-file metadata, and atomic writes
+    with <em>5 rolling backups</em>.
+  </p>
+</header>
+
+<div class="demo-wrap">
+
+  <!-- Left: Telegram chat mockup -->
+  <div class="shell">
+    <div class="chrome-bar">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      <span class="chrome-title">Telegram — StormDrive</span>
+    </div>
+    <div class="tg-header">
+      <div class="tg-avatar">⚡</div>
+      <div class="tg-info">
+        <div class="tg-name">StormDrive <span style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--accent);background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.3);padding:1px 5px;border-radius:2px;">BOT</span></div>
+        <div class="tg-status">● online</div>
+      </div>
+    </div>
+    <div class="chat-body">
+
+      <!-- ls command -->
+      <div class="msg-row out">
+        <div class="bubble out">
+          <span class="cmd">/ls</span> Projects/Backend
+          <div class="time">14:02</div>
+        </div>
+      </div>
+
+      <div class="msg-row">
+        <div class="bubble bot">
+          <div class="bname">StormDrive</div>
+          📂 <span class="val">Projects/Backend</span> — 4 items
+          <div class="folder-list">
+            <div class="folder-item"><span class="fi-icon">📁</span><span class="fi-name">api-server/</span><span class="fi-size">12 files</span></div>
+            <div class="folder-item"><span class="fi-icon">📁</span><span class="fi-name">db-migrations/</span><span class="fi-size">8 files</span></div>
+            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">schema.sql</span><span class="fi-size">44 KB</span></div>
+            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">README.md</span><span class="fi-size">3.2 KB</span></div>
+          </div>
+          <div class="time">14:02</div>
+        </div>
+      </div>
+
+      <!-- upload -->
+      <div class="msg-row out">
+        <div class="bubble out">
+          <div class="file-bubble">
+            <div class="file-icon">🗜️</div>
+            <div class="file-meta">
+              <div class="file-name">production-backup-2024.tar.gz</div>
+              <div class="file-size">1.2 GB</div>
+            </div>
+          </div>
+          <div class="time">14:03</div>
+        </div>
+      </div>
+
+      <div class="msg-row">
+        <div class="bubble bot">
+          <div class="bname">StormDrive</div>
+          <span class="ok">✓ Uploaded</span> → <span class="val">Projects/Backend/</span><br/>
+          <span class="dim">Metadata saved · Backup #3 rotated</span>
+          <div class="time">14:03</div>
+        </div>
+      </div>
+
+      <!-- search -->
+      <div class="msg-row out">
+        <div class="bubble out">
+          <span class="cmd">/search</span> schema
+          <div class="time">14:05</div>
+        </div>
+      </div>
+
+      <div class="msg-row">
+        <div class="bubble bot">
+          <div class="bname">StormDrive</div>
+          🔍 Found <span class="val">3</span> results:
+          <div class="folder-list">
+            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">Projects/Backend/schema.sql</span></div>
+            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">Archive/2023/db-schema-v2.sql</span></div>
+            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">Docs/schema-reference.pdf</span></div>
+          </div>
+          <div class="time">14:05</div>
+        </div>
+      </div>
+
+      <!-- move -->
+      <div class="msg-row out">
+        <div class="bubble out">
+          <span class="cmd">/move</span> Docs/schema-reference.pdf Projects/Backend/
+          <div class="time">14:06</div>
+        </div>
+      </div>
+
+      <div class="msg-row">
+        <div class="bubble bot">
+          <div class="bname">StormDrive</div>
+          <span class="ok">✓ Moved</span> <span class="val">schema-reference.pdf</span><br/>
+          <span class="dim">Docs/ → Projects/Backend/</span>
+          <div class="time">14:06</div>
+        </div>
+      </div>
+
+      <!-- favourites -->
+      <div class="msg-row out">
+        <div class="bubble out">
+          <span class="cmd">/fav</span> Projects/Backend/schema.sql
+          <div class="time">14:07</div>
+        </div>
+      </div>
+
+      <div class="msg-row">
+        <div class="bubble bot">
+          <div class="bname">StormDrive</div>
+          ⭐ <span class="ok">Starred</span> <span class="val">schema.sql</span>
+          <div class="time">14:07</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Right: Info cards -->
+  <div class="info-panel">
+
+    <div class="info-card">
+      <div class="lbl">What it does</div>
+      <p>Turns Telegram's unlimited media storage into a personal cloud drive — fully navigable with folders, metadata, search, and backups. No external storage costs, no size limits.</p>
+      <div class="storage-bar-wrap">
+        <div class="storage-label"><span>Used</span><span>~847 GB of ∞</span></div>
+        <div class="storage-bar"><div class="storage-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="lbl">Commands</div>
+      <div class="feature-list">
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>/ls [path]</strong> <span>— list folder contents</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>/search [query]</strong> <span>— full-drive search</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>/move /copy /rename</strong> <span>— file operations</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>/fav</strong> <span>— star files for quick access</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>/recent</strong> <span>— recently touched files</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>/meta</strong> <span>— per-file metadata viewer</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>/mkdir /rm</strong> <span>— create / delete</span></div></div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="lbl">System stats</div>
+      <div class="stat-row"><span class="k">lines of code</span><span class="v">3,378</span></div>
+      <div class="stat-row"><span class="k">git commits</span><span class="v">67</span></div>
+      <div class="stat-row"><span class="k">deployment</span><span class="v">Dockerized</span></div>
+      <div class="stat-row"><span class="k">rolling backups</span><span class="v">5 per file</span></div>
+      <div class="stat-row"><span class="k">write safety</span><span class="v">atomic</span></div>
+      <div class="tags">
+        <span class="tag">Python</span>
+        <span class="tag">Telegram API</span>
+        <span class="tag">Docker</span>
+        <span class="tag">JSON storage</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="page-footer">StormDrive · built by JishnuHaris</footer>
+
+</body>
+</html>

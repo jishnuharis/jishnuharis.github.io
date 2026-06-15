@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>FileTransferSystem — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#0c0c0f; --surface:#13131a; --border:#1e1e2e;
+    --accent:#7c6af7; --accent2:#3ecfb2; --dim:#3a3a52;
+    --muted:#6b6b8a; --text:#e2e2f0; --bright:#ffffff;
+    --red:#ff5f57; --yellow:#febc2e; --green:#28c840;
+  }
+  body{
+    background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:28px 16px 60px;
+  }
+  .topbar{
+    width:100%; max-width:940px; display:flex; align-items:center;
+    justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;
+  }
+  .back{
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted);
+    text-decoration:none; letter-spacing:.08em; border:1px solid var(--border);
+    padding:8px 14px; border-radius:4px; transition:.2s;
+  }
+  .back:hover{ color:var(--accent2); border-color:var(--accent2); }
+  .repo-link{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2);
+    text-decoration:none; letter-spacing:.06em; border:1px solid rgba(62,207,178,0.25);
+    padding:8px 14px; border-radius:4px; transition:.2s;
+  }
+  .repo-link:hover{ color:var(--bright); border-color:var(--accent2); }
+
+  header{ width:100%; max-width:940px; margin-bottom:24px; }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2);
+    letter-spacing:.15em; text-transform:uppercase; margin-bottom:10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:'';display:inline-block;width:24px;height:1px;background:var(--accent2);}
+  h1{
+    font-family:'JetBrains Mono',monospace; font-size:clamp(22px,4.5vw,36px);
+    font-weight:700; color:var(--bright); letter-spacing:-0.02em; margin-bottom:8px;
+  }
+  .sub{ color:var(--muted); font-size:14px; line-height:1.7; max-width:640px; }
+  .sub em{ color:var(--text); font-style:normal; }
+
+  /* ── Layout ── */
+  .demo-wrap{
+    width:100%; max-width:940px;
+    display:grid; grid-template-columns:1fr 1fr; gap:16px;
+  }
+  @media(max-width:660px){ .demo-wrap{grid-template-columns:1fr;} }
+
+  /* ── Window shell ── */
+  .shell{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; overflow:hidden; display:flex; flex-direction:column;
+    position:relative;
+  }
+  .shell::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); z-index:2;
+  }
+  .chrome-bar{
+    background:#1a1a24; padding:9px 14px; display:flex; align-items:center; gap:8px;
+    border-bottom:1px solid var(--border); flex-shrink:0;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;}
+  .dot-r{background:var(--red);} .dot-y{background:var(--yellow);} .dot-g{background:var(--green);}
+  .chrome-title{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted);
+    margin-left:6px; letter-spacing:.04em;
+  }
+
+  /* ── Terminal body ── */
+  .term-body{
+    padding:16px 18px; font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    line-height:2; flex:1;
+  }
+  .t-prompt{ color:var(--accent2); }
+  .t-cmd{ color:var(--text); }
+  .t-out{ color:var(--muted); }
+  .t-val{ color:var(--accent2); }
+  .t-ok{ color:var(--green); }
+  .t-warn{ color:var(--yellow); }
+  .t-err{ color:var(--red); }
+  .t-dim{ color:var(--dim); }
+  .t-accent{ color:var(--accent); }
+
+  .divider{
+    border:none; border-top:1px solid var(--border); margin:8px 0;
+  }
+
+  /* ── Architecture diagram ── */
+  .arch-wrap{
+    padding:16px 18px; display:flex; flex-direction:column; gap:14px;
+  }
+  .arch-label{
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2);
+    letter-spacing:.15em; text-transform:uppercase; margin-bottom:4px;
+  }
+
+  .node-row{
+    display:flex; align-items:center; gap:0; width:100%;
+  }
+  .node{
+    background:#1a2236; border:1px solid rgba(62,207,178,0.25);
+    border-radius:8px; padding:10px 14px; flex:1; text-align:center;
+  }
+  .node .n-icon{ font-size:20px; margin-bottom:4px; }
+  .node .n-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--bright); line-height:1.3; }
+  .node .n-sub{ font-size:10px; color:var(--muted); margin-top:2px; }
+
+  .relay-node{
+    background:rgba(124,106,247,0.12); border:1px solid rgba(124,106,247,0.35);
+    border-radius:8px; padding:10px 14px; flex:1; text-align:center;
+  }
+  .relay-node .n-icon{ font-size:20px; margin-bottom:4px; }
+  .relay-node .n-label{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent); }
+  .relay-node .n-sub{ font-size:10px; color:var(--muted); margin-top:2px; }
+
+  .arrow{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2);
+    padding:0 6px; display:flex; flex-direction:column; align-items:center;
+    gap:2px; flex-shrink:0;
+  }
+  .arrow .a-label{ font-size:9px; color:var(--dim); white-space:nowrap; }
+
+  .anon-badge{
+    background:rgba(255,95,87,0.12); border:1px solid rgba(255,95,87,0.3);
+    border-radius:4px; padding:4px 10px; font-size:11px; font-family:'JetBrains Mono',monospace;
+    color:var(--red); text-align:center; margin-top:4px;
+  }
+
+  /* transfer progress */
+  .progress-wrap{ margin-top:6px; }
+  .progress-bar{ height:5px; background:var(--border); border-radius:3px; overflow:hidden; margin-top:4px; }
+  .progress-fill{
+    height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2));
+    border-radius:3px; animation:progressAnim 2.5s ease-in-out infinite;
+  }
+  @keyframes progressAnim{
+    0%{width:0%} 60%{width:78%} 80%{width:82%} 100%{width:100%}
+  }
+  .progress-label{
+    display:flex; justify-content:space-between;
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:2px;
+  }
+
+  /* ── Right panel ── */
+  .info-panel{ display:flex; flex-direction:column; gap:12px; }
+  .info-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:16px 18px; position:relative; overflow:hidden;
+  }
+  .info-card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+  }
+  .lbl{
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2);
+    letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;
+  }
+  .info-card p{ color:var(--muted); font-size:13px; line-height:1.65; }
+
+  .feature-list{ display:flex; flex-direction:column; gap:6px; }
+  .feat{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; line-height:1.5; }
+  .feat-dot{ color:var(--accent2); font-size:11px; margin-top:2px; flex-shrink:0; }
+  .feat span{ color:var(--muted); }
+  .feat strong{ color:var(--text); font-weight:500; }
+
+  .stat-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12px; padding:5px 0; border-bottom:1px solid var(--border);
+  }
+  .stat-row:last-child{ border-bottom:none; }
+  .stat-row .k{ font-family:'JetBrains Mono',monospace; color:var(--muted); }
+  .stat-row .v{ color:var(--accent2); font-family:'JetBrains Mono',monospace; }
+
+  .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .tag{
+    font-family:'JetBrains Mono',monospace; font-size:10px;
+    padding:3px 8px; background:var(--border); color:var(--muted);
+    border-radius:2px; letter-spacing:.04em;
+  }
+
+  footer.page-footer{
+    margin-top:40px; width:100%; max-width:940px;
+    border-top:1px solid var(--border); padding-top:16px;
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim);
+    letter-spacing:.06em; text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="index.html">← back</a>
+  <a class="repo-link" href="https://github.com/jishnuharis/FileTransferSystem" target="_blank">→ github.com/jishnuharis/FileTransferSystem</a>
+</div>
+
+<header>
+  <div class="eyebrow">networking · systems · relay</div>
+  <h1>FileTransferSystem</h1>
+  <p class="sub">
+    A raw <em>TCP relay server</em> that pipes data between a sender and receiver in real time —
+    no HTTP overhead, no IP exposure, no middlemen. Just a clean connection handshake
+    and <em>transparent bidirectional relay</em>.
+  </p>
+</header>
+
+<div class="demo-wrap">
+
+  <!-- Left: terminal + architecture -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Server terminal -->
+    <div class="shell">
+      <div class="chrome-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="chrome-title">server.py — relay</span>
+      </div>
+      <div class="term-body">
+        <div><span class="t-prompt">$ </span><span class="t-cmd">python server.py</span></div>
+        <div><span class="t-out">→ Relay listening on </span><span class="t-val">0.0.0.0:9000</span></div>
+        <hr class="divider"/>
+        <div><span class="t-ok">[+]</span><span class="t-out"> Sender connected   </span><span class="t-val">82.x.x.x</span></div>
+        <div><span class="t-out">    Waiting for receiver…</span></div>
+        <div><span class="t-ok">[+]</span><span class="t-out"> Receiver connected  </span><span class="t-val">147.x.x.x</span></div>
+        <div><span class="t-ok">[✓]</span><span class="t-accent"> Handshake complete — piping data</span></div>
+        <hr class="divider"/>
+        <div><span class="t-out">    TX </span><span class="t-val">256 KB/s</span><span class="t-dim">  ·  sent </span><span class="t-val">41.2 MB</span></div>
+        <div><span class="t-out">    TX </span><span class="t-val">242 KB/s</span><span class="t-dim">  ·  sent </span><span class="t-val">83.7 MB</span></div>
+        <div><span class="t-out">    TX </span><span class="t-val">261 KB/s</span><span class="t-dim">  ·  sent </span><span class="t-val">127 MB</span></div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>video-project.mp4</span><span>1.4 GB</span></div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+        <div><span class="t-ok">[✓]</span><span class="t-out"> Transfer complete — closing relay</span></div>
+      </div>
+    </div>
+
+    <!-- Sender terminal -->
+    <div class="shell">
+      <div class="chrome-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="chrome-title">sender — client A</span>
+      </div>
+      <div class="term-body">
+        <div><span class="t-prompt">$ </span><span class="t-cmd">python send.py relay.host:9000 video-project.mp4</span></div>
+        <div><span class="t-out">Connecting to relay… </span><span class="t-ok">connected</span></div>
+        <div><span class="t-out">Sending </span><span class="t-val">video-project.mp4</span><span class="t-out"> (1.4 GB)</span></div>
+        <div><span class="t-out">Progress: </span><span class="t-val">████████░░  82%</span><span class="t-dim">  · 261 KB/s</span></div>
+        <div><span class="t-ok">[✓] Done.</span><span class="t-dim">  Receiver got every byte.</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right: architecture + info -->
+  <div class="info-panel">
+
+    <!-- Architecture -->
+    <div class="info-card">
+      <div class="lbl">How it works</div>
+      <div class="arch-wrap" style="padding:0;">
+        <div class="node-row">
+          <div class="node">
+            <div class="n-icon">💻</div>
+            <div class="n-label">Sender</div>
+            <div class="n-sub">unknown IP</div>
+          </div>
+          <div class="arrow">
+            <span>→</span>
+            <span class="a-label">TCP</span>
+          </div>
+          <div class="relay-node">
+            <div class="n-icon">🔁</div>
+            <div class="n-label">Relay Server</div>
+            <div class="n-sub">public host</div>
+          </div>
+          <div class="arrow">
+            <span>→</span>
+            <span class="a-label">TCP</span>
+          </div>
+          <div class="node">
+            <div class="n-icon">💻</div>
+            <div class="n-label">Receiver</div>
+            <div class="n-sub">unknown IP</div>
+          </div>
+        </div>
+        <div class="anon-badge">neither side ever sees the other's IP</div>
+      </div>
+      <p style="margin-top:12px;">The relay connects two sockets and spawns a thread to pipe bytes in each direction — the server never buffers the file, just blindly forwards chunks as they arrive.</p>
+    </div>
+
+    <div class="info-card">
+      <div class="lbl">Design decisions</div>
+      <div class="feature-list">
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>Raw TCP sockets</strong> <span>— no HTTP, no overhead, no framing</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>Threading</strong> <span>— one thread per direction for full-duplex relay</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>IP anonymity</strong> <span>— peers connect to the relay, never each other</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>Zero buffering</strong> <span>— chunks forwarded immediately as received</span></div></div>
+        <div class="feat"><span class="feat-dot">▸</span><div><strong>Procfile deploy</strong> <span>— hosted on Railway, always on</span></div></div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="lbl">System stats</div>
+      <div class="stat-row"><span class="k">protocol</span><span class="v">raw TCP</span></div>
+      <div class="stat-row"><span class="k">concurrency</span><span class="v">multi-threaded</span></div>
+      <div class="stat-row"><span class="k">IP exposure</span><span class="v">none</span></div>
+      <div class="stat-row"><span class="k">file size limit</span><span class="v">∞</span></div>
+      <div class="stat-row"><span class="k">deployment</span><span class="v">Railway</span></div>
+      <div class="tags">
+        <span class="tag">Python</span>
+        <span class="tag">Sockets</span>
+        <span class="tag">Threading</span>
+        <span class="tag">Railway</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="page-footer">FileTransferSystem · built by JishnuHaris</footer>
+
+</body>
+</html>
