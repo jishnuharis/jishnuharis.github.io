@@ -6,210 +6,241 @@
 <title>AnonChatZoneBot — Demo</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  :root{
+  *,*::before,*::after {box-sizing:border-box;margin:0;padding:0;}
+  :root {
     --bg:#0c0c0f; --surface:#13131a; --border:#1e1e2e;
     --accent:#7c6af7; --accent2:#3ecfb2; --dim:#3a3a52;
     --muted:#6b6b8a; --text:#e2e2f0; --bright:#ffffff;
     --red:#ff5f57; --yellow:#febc2e; --green:#28c840;
   }
-  body{
+  body {
     background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;
     min-height:100vh; display:flex; flex-direction:column; align-items:center;
     padding:28px 16px 60px;
   }
-  .topbar{
+  .topbar {
     width:100%; max-width:940px; display:flex; align-items:center;
     justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;
   }
-  .back{
+  .back {
     font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted);
     text-decoration:none; letter-spacing:.08em; border:1px solid var(--border);
     padding:8px 14px; border-radius:4px; transition:.2s;
   }
-  .back:hover{ color:var(--accent2); border-color:var(--accent2); }
-  .repo-link{
+  .back:hover { color:var(--accent2); border-color:var(--accent2); }
+  .repo-link {
     font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2);
     text-decoration:none; letter-spacing:.06em; border:1px solid rgba(62,207,178,0.25);
     padding:8px 14px; border-radius:4px; transition:.2s;
   }
-  .repo-link:hover{ color:var(--bright); border-color:var(--accent2); }
+  .repo-link:hover { color:var(--bright); border-color:var(--accent2); }
 
-  header{ width:100%; max-width:940px; margin-bottom:24px; }
-  .eyebrow{
+  header { width:100%; max-width:940px; margin-bottom:24px; }
+  .eyebrow {
     font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent2);
     letter-spacing:.15em; text-transform:uppercase; margin-bottom:10px;
     display:flex; align-items:center; gap:10px;
   }
-  .eyebrow::before{content:'';display:inline-block;width:24px;height:1px;background:var(--accent2);}
-  h1{
+  .eyebrow::before {content:'';display:inline-block;width:24px;height:1px;background:var(--accent2);}
+  h1 {
     font-family:'JetBrains Mono',monospace; font-size:clamp(22px,4.5vw,36px);
     font-weight:700; color:var(--bright); letter-spacing:-0.02em; margin-bottom:8px;
   }
-  .sub{ color:var(--muted); font-size:14px; line-height:1.7; max-width:640px; }
-  .sub em{ color:var(--text); font-style:normal; }
+  .sub { color:var(--muted); font-size:14px; line-height:1.7; max-width:640px; }
+  .sub em { color:var(--text); font-style:normal; }
 
   /* ── Layout ── */
-  .demo-wrap{
+  .top-bar {
+    display: flex; gap: 8px; width: 100%; max-width: 940px; margin-bottom: 16px;
+  }
+  .tab-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .06em;
+    background: var(--surface); color: var(--muted); border: 1px solid var(--border);
+    padding: 9px 18px; border-radius: 6px; cursor: pointer; transition: .2s;
+  }
+  .tab-btn:hover { color: var(--text); border-color: var(--accent2); }
+  .tab-btn.active {
+    color: var(--bright); border-color: var(--accent);
+    background: linear-gradient(180deg, rgba(124, 106, 247, 0.15), rgba(124, 106, 247, 0.05));
+  }
+  .tab-panel {display: none; }
+  .tab-panel.active {display: block;}
+
+  .story-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px 26px; max-width: 940px; position: relative; overflow: hidden;
+  }
+  .story-card::before{
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .story-card h2 {
+    font-family: 'JetBrain Mono', monospace; font-size: 15px; color: var(--accent2);
+    letter-spacing: 0.04em; margin: 22px 0 8px; 
+  }
+  .story-card h2:first-child { margin-top: 0; }
+  .story-card p { color: var(--text); font-size: 14px; line-height: 1.75; margin-bottom: 4px; text-indent: 2em;}
+  .story-card p em { color: var(--muted); font-style: normal; }
+  .demo-wrap {
     width:100%; max-width:940px;
     display:grid; grid-template-columns:1fr 1fr; gap:16px;
   }
   @media(max-width:660px){ .demo-wrap{grid-template-columns:1fr;} }
 
   /* ── Window shell ── */
-  .shell{
+  .shell {
     background:var(--surface); border:1px solid var(--border);
     border-radius:10px; overflow:hidden; display:flex; flex-direction:column;
-    position:relative;
+    position:relative; max-height: 640px;
   }
-  .shell::before{
+  .shell::before {
     content:''; position:absolute; top:0; left:0; right:0; height:2px;
     background:linear-gradient(90deg,var(--accent),var(--accent2)); z-index:2;
   }
-  .chrome-bar{
+  .chrome-bar {
     background:#1a1a24; padding:9px 14px; display:flex; align-items:center; gap:8px;
     border-bottom:1px solid var(--border); flex-shrink:0;
   }
-  .dot{width:9px;height:9px;border-radius:50%;}
-  .dot-r{background:var(--red);} .dot-y{background:var(--yellow);} .dot-g{background:var(--green);}
-  .chrome-title{
+  .dot {width:9px;height:9px;border-radius:50%;}
+  .dot-r {background:var(--red);} .dot-y{background:var(--yellow);} .dot-g{background:var(--green);}
+  .chrome-title {
     font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted);
     margin-left:6px; letter-spacing:.04em;
   }
 
   /* ── Telegram-style header ── */
-  .tg-header{
+  .tg-header {
     background:#181826; padding:10px 14px;
     display:flex; align-items:center; gap:10px;
     border-bottom:1px solid var(--border); flex-shrink:0;
   }
-  .tg-avatar{
+  .tg-avatar {
     width:36px; height:36px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
     font-size:16px; flex-shrink:0;
     background:linear-gradient(135deg,var(--accent),#3ecfb2);
   }
-  .tg-info{ flex:1; }
-  .tg-name{ font-size:13px; font-weight:600; color:var(--bright); line-height:1.2; }
-  .tg-status{ font-size:11px; color:var(--accent2); }
-  .bot-badge{
+  .tg-info { flex:1; }
+  .tg-name { font-size:13px; font-weight:600; color:var(--bright); line-height:1.2; }
+  .tg-status { font-size:11px; color:var(--accent2); }
+  .bot-badge {
     display:inline-block; font-size:9px; font-family:'JetBrains Mono',monospace;
     color:var(--accent); background:rgba(124,106,247,0.15); border:1px solid rgba(124,106,247,0.3);
     padding:1px 5px; border-radius:2px; vertical-align:middle; margin-left:4px;
   }
-  .tg-online-dot{
+  .tg-online-dot {
     width:8px; height:8px; border-radius:50%; background:var(--green);
     box-shadow:0 0 6px var(--green); flex-shrink:0;
   }
 
   /* ── Chat body ── */
-  .chat-body{
+  .chat-body {
     flex:1; overflow-y:auto; padding:10px 10px;
     display:flex; flex-direction:column; gap:5px;
-    min-height:300px; max-height:400px;
+    min-height:0px;
     scrollbar-width:thin; scrollbar-color:var(--dim) transparent;
   }
-  .chat-body::-webkit-scrollbar{width:4px;}
-  .chat-body::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px;}
+  .chat-body::-webkit-scrollbar {width:4px;}
+  .chat-body::-webkit-scrollbar-thumb {background:var(--dim);border-radius:2px;}
 
-  .msg-row{ display:flex; gap:6px; }
-  .msg-row.out{ flex-direction:row-reverse; }
+  .msg-row { display:flex; gap:6px; }
+  .msg-row.out { flex-direction:row-reverse; }
 
-  .msg-avatar{
+  .msg-avatar {
     width:26px; height:26px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
     font-size:11px; font-weight:700; flex-shrink:0; align-self:flex-end;
   }
 
-  .bubble{
+  .bubble {
     max-width:78%; padding:8px 11px; border-radius:10px;
     font-size:12.5px; line-height:1.5;
     animation:popIn 0.2s ease;
   }
-  @keyframes popIn{ from{opacity:0;transform:scale(0.9) translateY(4px)} to{opacity:1;transform:none} }
-  .bubble.in{ background:#1e2230; border-radius:10px 10px 10px 2px; color:var(--text); }
-  .bubble.out{ background:#2a2050; border-radius:10px 10px 2px 10px; color:var(--text); }
-  .bubble.bot{ background:#131f2e; border-radius:10px 10px 10px 2px; color:var(--text); }
-  .bubble .bname{ font-size:10px; font-weight:700; margin-bottom:2px; font-family:'JetBrains Mono',monospace; }
-  .bubble .time{ font-size:10px; color:var(--muted); text-align:right; margin-top:3px; }
-  .bubble .tick{ color:var(--accent2); font-size:11px; }
+  @keyframes popIn { from{opacity:0;transform:scale(0.9) translateY(4px)} to{opacity:1;transform:none} }
+  .bubble.in { background:#1e2230; border-radius:10px 10px 10px 2px; color:var(--text); }
+  .bubble.out { background:#2a2050; border-radius:10px 10px 2px 10px; color:var(--text); }
+  .bubble.bot { background:#131f2e; border-radius:10px 10px 10px 2px; color:var(--text); }
+  .bubble .bname { font-size:10px; font-weight:700; margin-bottom:2px; font-family:'JetBrains Mono',monospace; }
+  .bubble .time { font-size:10px; color:var(--muted); text-align:right; margin-top:3px; }
+  .bubble .tick { color:var(--accent2); font-size:11px; }
 
-  .cmd{ color:var(--accent2); font-family:'JetBrains Mono',monospace; font-size:12px; }
-  .val{ color:var(--yellow); font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .cmd { color:var(--accent2); font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .val { color:var(--yellow); font-family:'JetBrains Mono',monospace; font-size:12px; }
   .ok { color:var(--green); }
 
   /* typing indicator */
-  .typing-indicator{
+  .typing-indicator {
     display:flex; gap:4px; align-items:center; padding:8px 12px;
     background:#1e2230; border-radius:10px; width:fit-content;
   }
-  .typing-dot{
+  .typing-dot {
     width:6px; height:6px; border-radius:50%; background:var(--muted);
     animation:typingBounce 1.2s infinite ease-in-out;
   }
-  .typing-dot:nth-child(2){animation-delay:.2s;}
-  .typing-dot:nth-child(3){animation-delay:.4s;}
-  @keyframes typingBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+  .typing-dot:nth-child(2) {animation-delay:.2s;}
+  .typing-dot:nth-child(3) {animation-delay:.4s;}
+  @keyframes typingBounce {0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
   /* ── Input bar ── */
-  .tg-input{
+  .tg-input {
     border-top:1px solid var(--border); padding:10px;
     display:flex; gap:8px; align-items:center; background:#181826; flex-shrink:0;
   }
-  .tg-input input{
+  .tg-input input {
     flex:1; background:var(--bg); border:1px solid var(--border);
     color:var(--text); font-family:'Inter',sans-serif; font-size:13px;
     padding:8px 12px; border-radius:20px; outline:none; transition:.2s;
   }
-  .tg-input input:focus{ border-color:var(--accent); }
-  .tg-input input::placeholder{ color:var(--dim); }
-  .tg-send{
+  .tg-input input:focus { border-color:var(--accent); }
+  .tg-input input::placeholder { color:var(--dim); }
+  .tg-send {
     background:var(--accent); border:none; color:#fff;
     width:34px; height:34px; border-radius:50%; cursor:pointer;
     display:flex; align-items:center; justify-content:center; font-size:14px;
     transition:.2s; flex-shrink:0;
   }
-  .tg-send:hover{ background:#9585ff; }
-  .tg-send:active{ transform:scale(0.95); }
+  .tg-send:hover { background:#9585ff; }
+  .tg-send:active { transform:scale(0.95); }
 
   /* ── Right panel ── */
-  .info-panel{ display:flex; flex-direction:column; gap:12px; }
-  .info-card{
+  .info-panel { display:flex; flex-direction:column; gap:12px; }
+  .info-card {
     background:var(--surface); border:1px solid var(--border);
     border-radius:8px; padding:16px 18px; position:relative; overflow:hidden;
   }
-  .info-card::before{
+  .info-card::before {
     content:''; position:absolute; top:0; left:0; right:0; height:2px;
     background:linear-gradient(90deg,var(--accent),var(--accent2));
   }
-  .lbl{
+  .lbl {
     font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2);
     letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px;
   }
-  .info-card p{ color:var(--muted); font-size:13px; line-height:1.65; }
+  .info-card p { color:var(--muted); font-size:13px; line-height:1.65; }
 
-  .feature-list{ display:flex; flex-direction:column; gap:6px; }
-  .feat{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; line-height:1.5; }
-  .feat-dot{ color:var(--accent2); font-size:11px; margin-top:2px; flex-shrink:0; }
-  .feat span{ color:var(--muted); }
-  .feat strong{ color:var(--text); font-weight:500; }
+  .feature-list { display:flex; flex-direction:column; gap:6px; }
+  .feat { display:flex; align-items:flex-start; gap:8px; font-size:12.5px; line-height:1.5; }
+  .feat-dot { color:var(--accent2); font-size:11px; margin-top:2px; flex-shrink:0; }
+  .feat span { color:var(--muted); }
+  .feat strong { color:var(--text); font-weight:500; }
 
-  .stat-row{
+  .stat-row {
     display:flex; justify-content:space-between; align-items:center;
     font-size:12px; padding:5px 0; border-bottom:1px solid var(--border);
   }
-  .stat-row:last-child{ border-bottom:none; }
-  .stat-row .k{ font-family:'JetBrains Mono',monospace; color:var(--muted); }
-  .stat-row .v{ color:var(--accent2); font-family:'JetBrains Mono',monospace; }
+  .stat-row:last-child { border-bottom:none; }
+  .stat-row .k { font-family:'JetBrains Mono',monospace; color:var(--muted); }
+  .stat-row .v { color:var(--accent2); font-family:'JetBrains Mono',monospace; }
 
-  .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-  .tag{
+  .tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .tag {
     font-family:'JetBrains Mono',monospace; font-size:10px;
     padding:3px 8px; background:var(--border); color:var(--muted);
     border-radius:2px; letter-spacing:.04em;
   }
 
-  footer.page-footer{
+  footer.page-footer {
     margin-top:40px; width:100%; max-width:940px;
     border-top:1px solid var(--border); padding-top:16px;
     font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim);
@@ -220,80 +251,101 @@
 <body>
 
 <div class="topbar">
-  <a class="back" href="index.html">← back</a>
-  <a class="repo-link" href="https://github.com/jishnuharis/AnonChatZoneBot" target="_blank">→ github.com/jishnuharis/AnonChatZoneBot</a>
+  <a class="back" href="index.html">← Back</a>
+  <a class="repo-link" href="https://github.com/jishnuharis/AnonChatZoneBot" target="_blank">→ GitHub</a>
 </div>
 
 <header>
-  <div class="eyebrow">bot · real-time · deployed on railway</div>
+  <div class="eyebrow">bot · real-time · live on telegram</div>
   <h1>AnonChatZoneBot</h1>
   <p class="sub">
-    A Telegram bot that <em>randomly pairs strangers</em> for anonymous conversations —
-    full command system, user rating & reporting, gender/country filters, persistent data,
-    admin controls, and a built-in <em>coin-steal minigame</em>. 183 commits, live on Railway.
+    A Telegram bot that <em>randomly pairs strangers</em> for anonymous conversations, with a
+    full command system, user rating & reporting, persistent data,
+    admin controls, and a <em>coin-steal minigame</em> and more on the way. Have done 183 commits, and it is live right now on Telegram.
   </p>
 </header>
 
-<div class="demo-wrap">
+<div class="top-bar">
+  <button class="tab-btn active" data-tab="demo">▸ Live Demo</button>
+  <button class="tab-btn" data-tab="story">▸ How I Built It</button>
+</div>
 
-  <!-- Left: interactive Telegram chat mockup -->
-  <div class="shell">
-    <div class="chrome-bar">
-      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-      <span class="chrome-title">Telegram — @AnonChatZoneBot</span>
-    </div>
-    <div class="tg-header">
-      <div class="tg-avatar">🤖</div>
-      <div class="tg-info">
-        <div class="tg-name">AnonChatZoneBot <span class="bot-badge">BOT</span></div>
-        <div class="tg-status">● online · 183 commits · Railway</div>
+<div class="tab-panel active" id="panel-demo">
+  <div class="demo-wrap">
+
+    <!-- Left: interactive Telegram chat mockup -->
+    <div class="shell">
+      <div class="chrome-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="chrome-title">Telegram — @AnonChatZoneBot [DEMO]</span>
       </div>
-      <div class="tg-online-dot"></div>
+      <div class="tg-header">
+        <div class="tg-avatar">🤖</div>
+        <div class="tg-info">
+          <div class="tg-name">AnonChatZoneBot <span class="bot-badge">BOT</span></div>
+          <div class="tg-status">● online · 400+ users · Telegram</div>
+        </div>
+        <div class="tg-online-dot"></div>
+      </div>
+      <div class="chat-body" id="chatBody"></div>
+      <div class="tg-input">
+        <input type="text" id="chatInput" placeholder="Send a command or message…" maxlength="200" />
+        <button class="tg-send" id="sendBtn">➤</button>
+      </div>
     </div>
-    <div class="chat-body" id="chatBody"></div>
-    <div class="tg-input">
-      <input type="text" id="chatInput" placeholder="Send a command or message…" maxlength="200" />
-      <button class="tg-send" id="sendBtn">➤</button>
+
+    <!-- Right: info cards -->
+    <div class="info-panel">
+
+      <div class="info-card">
+        <div class="lbl">How it works</div>
+        <p>Users send <span style="color:var(--accent2);font-family:'JetBrains Mono',monospace">/find</span> to join a queue. The bot pairs two strangers instantly and relays every message bidirectionally and neither side ever sees the other's Telegram ID. Admin controls for moderation are baked in with an integrated rating system to help filter out abuse of the bot.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="lbl">Command system</div>
+        <div class="feature-list">
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/find</strong> <span>— match with a random chat partner</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/next</strong> <span>— skip to the next partner</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/stop</strong> <span>— end the current chat</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/help</strong> <span>— guide the user with the bot's functionalities</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/profile</strong> <span>— show the user's profile, rating and points scored</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/coinsteal</strong> <span>— play a coin-steal minigame with partner</span></div></div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="lbl">System stats</div>
+        <div class="stat-row"><span class="k">language</span><span class="v">Python</span></div>
+        <div class="stat-row"><span class="k">library</span><span class="v">python-telegram-bot</span></div>
+        <div class="stat-row"><span class="k">status</span><span class="v">online</span></div>
+        <div class="stat-row"><span class="k">platform</span><span class="v">telegram</span></div>
+        <div class="stat-row"><span class="k">users</span><span class="v">400+</span></div>
+        <div class="tags">
+          <span class="tag">Python</span>
+          <span class="tag">Telegram API</span>
+          <span class="tag">Data Handling</span>
+          <span class="tag">Threading</span>
+        </div>
+      </div>
+
     </div>
   </div>
+</div>
 
-  <!-- Right: info cards -->
-  <div class="info-panel">
+<div class="tab-panel" id="panel-story">
+  <div class="story-card">
+    <h2>The idea</h2>
+    <p><t>I wanted to build something that didn't feel like a toy bot. Most "random chat" bots online are barebones, no persistence, no real safety net. I wanted one that actually held state properly: profiles, ratings, reports, even a small game to give people a reason to stick around in a chat instead of just skipping immediately. The whole thing runs without storing any third-party data or accounts, just Telegram IDs, paired and forgotten once the chat ends.</p>
 
-    <div class="info-card">
-      <div class="lbl">How it works</div>
-      <p>Users send <span style="color:var(--accent2);font-family:'JetBrains Mono',monospace">/find</span> to join a queue. The bot pairs two strangers instantly and relays every message bidirectionally — neither side ever sees the other's Telegram ID. Gender and country filters narrow the match pool. Admin controls for moderation are baked in.</p>
-    </div>
+    <h2>Architecture</h2>
+    <p><t>The bot is built on <span class="val">python-telegram-bot v20+</span> with async handlers and a job-queue for periodic tasks. Two users land in a shared waiting queue via <span class="cmd">/find</span>, and the moment there are two in the queue, they're paired and the bot starts forwarding everything between them <span class="val">(text, photos, video notes, voice messages, stickers, GIFs)</span> without either side ever seeing the other's real Telegram ID. User data <span class="val">(profile, points, ratings)</span> lives in the database, but instead of writing on every single change, I track which users are "dirty" in a set and flush only those every 60 seconds whixh cuts down on database load a lot compared to writing the whole table constantly. A Flask keep-alive server runs alongside it so cloud platforms don't spin the bot down for being idle.</p>
 
-    <div class="info-card">
-      <div class="lbl">Command system</div>
-      <div class="feature-list">
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/find</strong> <span>— match with a random stranger</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/next</strong> <span>— skip to the next partner</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/stop</strong> <span>— end the current chat</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/profile</strong> <span>— view your coins, rating & stats</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/steal</strong> <span>— coin-steal minigame with partner</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/rate /report</strong> <span>— rate or flag your partner</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/gender /country</strong> <span>— set match filters</span></div></div>
-      </div>
-    </div>
+    <h2>Challenges</h2>
+    <p><t>The trickiest part was state recovery: if the bot restarts mid-conversation (deploys happen), I needed every active pairing restored from the database on boot, not just user profiles, otherwise people get silently disconnected and have no idea why. Double-voting was another one: nothing stopped a user from spamming 👍/👎 on the same partner over and over which can be misused if left unchecked, so I built a <span class="val">feedback track system</span> to block repeat votes within a session, then clear it out every 8 hours so it doesn't bloat memory forever. I also had to be careful with Telegram's API itself, users block the bot constantly, so every API call routes through a wrapper that swallows <span class="val">Forbidden errors</span> instead of crashing the whole update loop. And for real bugs, instead of just logging to a file I never check, I built a global error handler that DMs me the full traceback (exception type and exact file/line) straight to my own Telegram on every unhandled exception.</p>
 
-    <div class="info-card">
-      <div class="lbl">System stats</div>
-      <div class="stat-row"><span class="k">commits</span><span class="v">183</span></div>
-      <div class="stat-row"><span class="k">language</span><span class="v">Python</span></div>
-      <div class="stat-row"><span class="k">library</span><span class="v">python-telegram-bot</span></div>
-      <div class="stat-row"><span class="k">deployment</span><span class="v">Railway</span></div>
-      <div class="stat-row"><span class="k">data</span><span class="v">persistent + auto-save</span></div>
-      <div class="stat-row"><span class="k">minigame</span><span class="v">coin steal</span></div>
-      <div class="tags">
-        <span class="tag">Python</span>
-        <span class="tag">Telegram API</span>
-        <span class="tag">Railway</span>
-        <span class="tag">Threading</span>
-      </div>
-    </div>
-
+    <h2>What I'd improve</h2>
+    <p><t>Right now matching is fully random from the queue and the time people joined the queue, even though I collect gender, age, and country during setup, adding <span class="val">actual filtering</span> on those would make matches more relevant instead of just throwing two random people together. I'd also like rate-limiting on <span class="cmd">/next</span> itself, since right now nothing stops someone from skipping partners as fast as they can type. Longer term, I want to expand the <span class="val">Coin Steal</span> game into something with more rounds and stakes. Right now it's a fun side feature, but there's room to make it a bigger part of why people stay in a chat.</p>
   </div>
 </div>
 
@@ -306,9 +358,10 @@ const input = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendBtn');
 
 let paired = false;
-let partnerHandle = null;
-let userCoins = 120;
-let partnerCoins = 80;
+let coinsteal = false;
+let round = 0;
+let uscore = 0, pscore = 0;
+let points = 0;
 let chatCount = 0;
 
 function now() {
@@ -335,7 +388,7 @@ function addMsg(type, name, color, text, extra='') {
 
 function addBot(text) { addMsg('bot', '🤖 AnonBot', '#7c6af7', text); }
 function addUser(text) { addMsg('out', 'You', '#5a50cc', text, '<span class="tick">✓✓</span>'); }
-function addStranger(text) { addMsg('in', partnerHandle||'Stranger', '#3ecfb2', text); }
+function addStranger(text) { addMsg('in', 'Stranger', '#3ecfb2', text); }
 
 function addSystem(text) {
   const div = document.createElement('div');
@@ -375,8 +428,6 @@ function showBotTyping(delay, callback) {
   setTimeout(()=>{ body.removeChild(row); callback(); }, delay);
 }
 
-const handles = ['shadow_user','anon_knight','ghost_traveller','neon_duck','pixel_rogue'];
-const countries = ['🇮🇳 India','🇺🇸 USA','🇩🇪 Germany','🇧🇷 Brazil','🇯🇵 Japan'];
 const replies = [
   'hey! how are you?','what do you do?',
   'oh interesting! i usually just code all day lol','same tbh. what kind of projects?',
@@ -393,6 +444,23 @@ function strangerReply() {
   });
 }
 
+function cs_result(us, ps) {
+  if (us > ps) {
+    showBotTyping(670, ()=> {
+    addBot(`<span class="ok">Congratulations!</span> You won!<br>Your score: ${us}.<br>Your partner's score: ${ps}.<br>+10 Points for you!!`);
+    points += 10;
+    });
+  } else if (us < ps) {
+    showBotTyping(670, ()=> {
+    addBot(`<span style="color:var(--red)">Alas!</span> You lost!<br>Your score: ${us}.<br>Your partner's score: ${ps}.<br>+10 Points for your partner!`);
+    });
+  } else {
+    showBotTyping(670, ()=> {
+    addBot(`<span class="cmd">Tough one!</span> It's a draw!<br>Your score: ${us}.<br>Your partner's score: ${ps}. No points for both.`);
+    });
+  }
+}
+
 function handleCommand(cmd) {
   const parts = cmd.trim().split(/\s+/);
   const c = parts[0].toLowerCase();
@@ -404,91 +472,90 @@ function handleCommand(cmd) {
   } else if(c === '/find') {
     if(paired){ addBot('You are already in a chat! Use <span class="cmd">/next</span> to skip or <span class="cmd">/stop</span> to end.'); return; }
     showBotTyping(400, ()=>{
-      addBot('🔍 <span class="ok">Searching for a stranger…</span>');
+      addBot('🔍 <span class="ok">Searching for a partner…</span>');
       addSystem('— looking for a match —');
       setTimeout(()=>{
-        partnerHandle = handles[Math.floor(Math.random()*handles.length)];
-        const country = countries[Math.floor(Math.random()*countries.length)];
         paired = true; chatCount++;
-        addBot(`✅ <span class="ok">Connected!</span> Chatting with <span class="val">${partnerHandle}</span> from <span class="val">${country}</span>.<br><br>Your identities are hidden. Use <span class="cmd">/next</span> to skip or <span class="cmd">/stop</span> to end.`);
-        addSystem(`— connected to ${partnerHandle} —`);
+        addBot(`✅ <span class="ok">Connected!</span> Partner found!</span>.<br><br>Your identities are hidden. Use <span class="cmd">/next</span> to skip or <span class="cmd">/stop</span> to end.`);
+        addSystem(`— connected —`);
         setTimeout(()=>{ strangerReply(); }, 600);
       }, 1200);
     });
   } else if(c === '/next') {
     if(!paired){ addBot('You are not in a chat. Use <span class="cmd">/find</span> first.'); return; }
-    addSystem(`— chat with ${partnerHandle} ended —`);
-    paired = false; replyIdx = 0;
+    addSystem(`— chat ended —`);
+    paired = false; coinsteal = false; replyIdx = 0;
     showBotTyping(400, ()=>{
       addBot('⏭ Skipped. Finding a new stranger…');
       setTimeout(()=>{
-        partnerHandle = handles[Math.floor(Math.random()*handles.length)];
-        const country = countries[Math.floor(Math.random()*countries.length)];
         paired = true; chatCount++;
-        addBot(`✅ <span class="ok">New partner found!</span> Chatting with <span class="val">${partnerHandle}</span> from <span class="val">${country}</span>.`);
-        addSystem(`— connected to ${partnerHandle} —`);
+        addBot(`✅ <span class="ok">New partner found!</span> <br><br>Your identities are hidden. Use <span class="cmd">/next</span> to skip or <span class="cmd">/stop</span> to end.`);
+        addSystem(`— connected —`);
         setTimeout(()=>{ strangerReply(); }, 700);
       }, 1000);
     });
   } else if(c === '/stop') {
     if(!paired){ addBot('No active chat to stop.'); return; }
-    addSystem(`— chat with ${partnerHandle} ended —`);
-    paired = false;
+    addSystem(`— chat ended —`);
+    paired = false; coinsteal = false; replyIdx = 0;
     showBotTyping(300, ()=>{
       addBot('🛑 Chat ended. Use <span class="cmd">/find</span> to start a new one.');
     });
   } else if(c === '/profile') {
     showBotTyping(400, ()=>{
-      addBot(`👤 <b>Your Profile</b><br><br><span class="cmd">Handle:</span> <span class="val">you</span><br><span class="cmd">Coins:</span> <span class="val">${userCoins} 🪙</span><br><span class="cmd">Chats:</span> <span class="val">${chatCount}</span><br><span class="cmd">Rating:</span> <span class="val">⭐ 4.7</span><br><span class="cmd">Reports:</span> <span class="val">0</span>`);
+      addBot(`👤 <b>Your Profile</b><br><br><span class="cmd">Handle:</span> <span class="val">you</span><br><span class="cmd">Points:</span> <span class="val">${points} 🪙</span><br><span class="cmd">Chats:</span> <span class="val">${chatCount}</span><br><span class="cmd">Rating:</span> <span class="val">⭐ 4.7</span><br><span class="cmd">Reports:</span> <span class="val">0</span>`);
     });
-  } else if(c === '/rate') {
-    if(!paired){ addBot('You need to be in a chat to rate. Use <span class="cmd">/find</span> first.'); return; }
-    const r = parts[1];
-    if(!r || isNaN(r) || r<1 || r>5){ addBot('Usage: <span class="cmd">/rate</span> <span class="val">[1-5]</span>'); return; }
-    showBotTyping(300, ()=>{
-      addBot(`⭐ You rated <span class="val">${partnerHandle}</span> <span class="val">${r}/5</span>. Thanks!`);
-    });
-  } else if(c === '/steal') {
-    if(!paired){ addBot('You need to be in a chat to steal coins.'); return; }
+  } else if(c === '/coinsteal') {
+    if (!paired) { addBot('You need to be in a chat to steal coins.'); return; }
+    if (coinsteal) { addBot('You or your partner is already in a game, end it first to play.'); return; }
+    coinsteal = true;
     showBotTyping(600, ()=>{
-      const success = Math.random() > 0.45;
-      const amount = Math.floor(5+Math.random()*20);
-      if(success){
-        userCoins += amount; partnerCoins -= amount;
-        addBot(`🎰 <span class="ok">Success!</span> You stole <span class="val">${amount} 🪙</span> from <span class="val">${partnerHandle}</span>!<br>Your coins: <span class="val">${userCoins} 🪙</span>`);
-      } else {
-        const lost = Math.floor(3+Math.random()*10);
-        userCoins -= lost; partnerCoins += lost;
-        addBot(`🎰 <span style="color:var(--red)">Caught!</span> You lost <span class="val">${lost} 🪙</span> trying to steal from <span class="val">${partnerHandle}</span>.<br>Your coins: <span class="val">${userCoins} 🪙</span>`);
-      }
+      addBot(`<span class="ok">Game started!</span> Play a game of coin steal with your partner. Now choose <span class="cmd">/steal</span> or <span class="cmd">/save</span>.<br> 2x Multiplier for Round 3!`);
     });
-  } else if(c === '/report') {
-    if(!paired){ addBot('You need to be in a chat to report someone.'); return; }
-    showBotTyping(400, ()=>{
-      addBot(`🚨 <span class="ok">Report submitted</span> against <span class="val">${partnerHandle}</span>. Admins will review it. Chat ended.`);
-      addSystem('— report sent —');
-      paired = false;
-    });
-  } else if(c === '/gender') {
-    showBotTyping(300, ()=>{
-      addBot('👤 Choose a gender filter:<br><br><span class="val">M</span> — male &nbsp; <span class="val">F</span> — female &nbsp; <span class="val">any</span> — no preference<br><br>Usage: <span class="cmd">/gender</span> <span class="val">M | F | any</span>');
-    });
-  } else if(c === '/country') {
-    showBotTyping(300, ()=>{
-      addBot('🌍 Set a country filter:<br><br>Usage: <span class="cmd">/country</span> <span class="val">[code]</span><br>Example: <span class="cmd">/country</span> <span class="val">IN</span><br><br>Or use <span class="cmd">/country any</span> to remove filter.');
-    });
+  } else if (c === '/steal' && coinsteal) {
+      round++;
+      const psteal = Math.random() > 0.5;
+      const mult = (round === 3 && !psteal) ? 2 : 1;
+      showBotTyping(670, ()=> {
+        if (psteal) { 
+          addBot(`Your partner chose to <span style="color:var(--red)">Steal</span>. Both get no points.`);
+        } else {
+          uscore += mult * 2;
+          addBot(`Your partner chose to <span class="ok">Save</span>. Poor soul. Now you get +${mult * 2} points. You score is <b>${uscore}</b> now.`);
+        }
+        if (round === 3) { 
+          cs_result(uscore, pscore);
+          coinsteal = false;
+          uscore = 0; pscore = 0; round = 0;
+        }
+      });
+  } else if (c === '/save' && coinsteal) {
+      round++;
+      const psave = Math.random() > 0.5;
+      const mult = (round === 3 && !psave) ? 2 : 1;
+      showBotTyping(670, ()=>{
+        if (!psave) { 
+          pscore += mult * 2; 
+          addBot(`Your partner chose to <span style="color:var(--red)">Steal</span>. They got +${mult * 2} points. Their score is <b>${pscore}</b> now.`);
+        } else {
+          uscore += mult * 1; pscore += mult * 1;
+          addBot(`Your partner chose to <span class="ok">Save</span>. You both get +${mult * 1} points. Your score is <b>${uscore}</b> and their score is <b>${pscore}</b> now.`);
+        }
+        if (round === 3) { 
+          cs_result(uscore, pscore);
+          coinsteal = false;
+          uscore = 0; pscore = 0; round = 0;
+        }
+      });
   } else if(c === '/help') {
     showBotTyping(400, ()=>{
       addBot('<span class="ok">Available commands:</span><br><br>' +
         '<span class="cmd">/find</span> — find a partner<br>' +
         '<span class="cmd">/next</span> — skip current partner<br>' +
-        '<span class="cmd">/stop</span> — end chat<br>' +
+        '<span class="cmd">/stop</span> — end current chat<br>' +
+        '<span class="cmd">/help</span> — show help<br>' +
         '<span class="cmd">/profile</span> — your stats<br>' +
-        '<span class="cmd">/rate [1-5]</span> — rate partner<br>' +
-        '<span class="cmd">/steal</span> — coin steal game<br>' +
-        '<span class="cmd">/report</span> — report partner<br>' +
-        '<span class="cmd">/gender</span> — set gender filter<br>' +
-        '<span class="cmd">/country</span> — set country filter');
+        '<span class="cmd">/coinsteal</span> — coin steal game<br>');
     });
   } else if(c.startsWith('/')) {
     showBotTyping(200, ()=>{
@@ -519,6 +586,15 @@ setTimeout(()=>{ addSystem('— AnonChatZoneBot is online —'); }, 300);
 setTimeout(()=>{
   addBot(`👋 <span class="ok">Welcome to AnonChatZoneBot!</span><br><br>I pair you with random strangers for anonymous chats on Telegram.<br><br>Try <span class="cmd">/find</span> to match with a stranger, or <span class="cmd">/help</span> for all commands.`);
 }, 800);
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
 </script>
 </body>
 </html>

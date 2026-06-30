@@ -46,21 +46,51 @@
     font-family:'JetBrains Mono',monospace; font-size:clamp(22px,4.5vw,36px);
     font-weight:700; color:var(--bright); letter-spacing:-0.02em; margin-bottom:8px;
   }
-  .sub{ color:var(--muted); font-size:14px; line-height:1.7; max-width:640px; }
+  .sub{ color:var(--muted); font-size:14px; line-height:1.7; max-width:660px; }
   .sub em{ color:var(--text); font-style:normal; }
 
-  /* ── Layout ── */
+  .top-bar {
+    display: flex; gap: 8px; width: 100%; max-width: 940px; margin-bottom: 16px;
+  }
+  .tab-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .06em;
+    background: var(--surface); color: var(--muted); border: 1px solid var(--border);
+    padding: 9px 18px; border-radius: 6px; cursor: pointer; transition: .2s;
+  }
+  .tab-btn:hover { color: var(--text); border-color: var(--accent2); }
+  .tab-btn.active {
+    color: var(--bright); border-color: var(--accent);
+    background: linear-gradient(180deg, rgba(124, 106, 247, 0.15), rgba(124, 106, 247, 0.05));
+  }
+  .tab-panel {display: none; }
+  .tab-panel.active {display: block;}
+
+  .story-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px 26px; max-width: 940px; position: relative; overflow: hidden;
+  }
+  .story-card::before{
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .story-card h2 {
+    font-family: 'JetBrain Mono', monospace; font-size: 15px; color: var(--accent2);
+    letter-spacing: 0.04em; margin: 22px 0 8px; 
+  }
+  .story-card h2:first-child { margin-top: 0; }
+  .story-card p { color: var(--text); font-size: 14px; line-height: 1.75; margin-bottom: 4px; text-indent: 2em;}
+  .story-card p em { color: var(--muted); font-style: normal; }
+
   .demo-wrap{
     width:100%; max-width:940px;
     display:grid; grid-template-columns:1fr 1fr; gap:16px;
   }
   @media(max-width:660px){ .demo-wrap{grid-template-columns:1fr;} }
 
-  /* ── Window chrome shell ── */
   .shell{
     background:var(--surface); border:1px solid var(--border);
     border-radius:10px; overflow:hidden; display:flex; flex-direction:column;
-    position:relative;
+    position:relative; max-height:700px;
   }
   .shell::before{
     content:''; position:absolute; top:0; left:0; right:0; height:2px;
@@ -77,7 +107,6 @@
     margin-left:6px; letter-spacing:.04em;
   }
 
-  /* ── Telegram-style header ── */
   .tg-header{
     background:#181826; padding:10px 14px;
     display:flex; align-items:center; gap:10px;
@@ -86,18 +115,16 @@
   .tg-avatar{
     width:36px; height:36px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700;
-    flex-shrink:0; background:linear-gradient(135deg,var(--accent),#5a48cc);
+    font-size:16px; flex-shrink:0; background:linear-gradient(135deg,var(--accent),#5a48cc);
   }
   .tg-info{ flex:1; }
   .tg-name{ font-size:13px; font-weight:600; color:var(--bright); line-height:1.2; }
   .tg-status{ font-size:11px; color:var(--accent2); }
 
-  /* ── Chat body ── */
   .chat-body{
     flex:1; overflow-y:auto; padding:10px 10px;
-    display:flex; flex-direction:column; gap:5px;
-    min-height:300px; max-height:400px;
+    display:flex; flex-direction:column; gap:8px;
+    min-height:0px;
     scrollbar-width:thin; scrollbar-color:var(--dim) transparent;
   }
   .chat-body::-webkit-scrollbar{width:4px;}
@@ -106,26 +133,43 @@
   .msg-row{ display:flex; gap:6px; }
   .msg-row.out{ flex-direction:row-reverse; }
 
-  .bubble{
-    max-width:78%; padding:7px 11px; border-radius:10px;
-    font-size:12.5px; line-height:1.5;
+  .msg-avatar{
+    width:26px; height:26px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; flex-shrink:0; align-self:flex-end;
   }
-  .bubble.in{ background:#1e2230; border-radius:10px 10px 10px 2px; color:var(--text); }
-  .bubble.out{ background:#2a2050; border-radius:10px 10px 2px 10px; color:var(--text); }
-  .bubble.bot{ background:#131f2e; border-radius:10px 10px 10px 2px; color:var(--text); }
-  .bubble .bname{ font-size:10px; font-weight:700; color:var(--accent); margin-bottom:2px; font-family:'JetBrains Mono',monospace; }
-  .bubble .time{ font-size:10px; color:var(--muted); text-align:right; margin-top:3px; }
 
-  .cmd{ color:var(--accent2); font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .bubble{
+    max-width:86%; padding:9px 12px; border-radius:10px;
+    font-size:12.5px; line-height:1.55;
+    animation:popIn 0.2s ease;
+  }
+  @keyframes popIn{ from{opacity:0;transform:scale(0.95) translateY(3px)} to{opacity:1;transform:none} }
+  .bubble.out{ background:#2a2050; border-radius:10px 10px 2px 10px; color:var(--text); max-width:78%; }
+  .bubble.bot{ background:#131f2e; border-radius:10px 10px 10px 2px; color:var(--text); }
+  .bubble .bname{ font-size:10px; font-weight:700; color:var(--accent); margin-bottom:3px; font-family:'JetBrains Mono',monospace; }
+  .bubble .time{ font-size:10px; color:var(--muted); text-align:right; margin-top:5px; }
+
+  .cmd { color:var(--accent2); font-family:'JetBrains Mono',monospace; font-size:12px; }
   .val{ color:var(--yellow); font-family:'JetBrains Mono',monospace; font-size:12px; }
   .ok{ color:var(--green); }
   .dim{ color:var(--muted); }
 
-  /* file attachment bubble */
+  .tg-keyboard{ display:flex; flex-direction:column; gap:5px; margin-top:8px; }
+  .tg-kb-row{ display:flex; gap:5px; }
+  .tg-kb-btn{
+    flex:1; background:#1c2336; border:1px solid rgba(124,106,247,0.3);
+    color:var(--accent2); font-family:'Inter',sans-serif; font-size:11.5px;
+    padding:7px 8px; border-radius:6px; cursor:pointer; text-align:center;
+    transition:.15s; line-height:1.3;
+  }
+  .tg-kb-btn:hover{ background:rgba(124,106,247,0.22); border-color:var(--accent); color:var(--bright); }
+  .tg-kb-btn:active{ transform:scale(0.97); }
+
   .file-bubble{
     background:#1a2236; border:1px solid rgba(62,207,178,0.2);
     border-radius:8px; padding:8px 10px; display:flex; align-items:center; gap:8px;
-    margin-top:4px;
+    margin-top:2px;
   }
   .file-icon{
     width:30px; height:30px; border-radius:6px;
@@ -136,17 +180,26 @@
   .file-name{ font-size:11px; font-weight:600; color:var(--bright); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .file-size{ font-size:10px; color:var(--muted); }
 
-  /* folder listing */
-  .folder-list{ display:flex; flex-direction:column; gap:3px; margin-top:4px; }
-  .folder-item{
-    display:flex; align-items:center; gap:7px; padding:4px 6px;
-    border-radius:4px; background:rgba(255,255,255,0.03); font-size:12px;
+  .tg-input{
+    border-top:1px solid var(--border); padding:10px;
+    display:flex; gap:8px; align-items:center; background:#181826; flex-shrink:0;
   }
-  .folder-item .fi-icon{ font-size:13px; }
-  .folder-item .fi-name{ color:var(--text); flex:1; }
-  .folder-item .fi-size{ color:var(--muted); font-size:10px; }
+  .tg-input input{
+    flex:1; background:var(--bg); border:1px solid var(--border);
+    color:var(--text); font-family:'Inter',sans-serif; font-size:13px;
+    padding:8px 12px; border-radius:20px; outline:none; transition:.2s;
+  }
+  .tg-input input:focus{ border-color:var(--accent); }
+  .tg-input input::placeholder{ color:var(--dim); }
+  .tg-send{
+    background:var(--accent); border:none; color:#fff;
+    width:34px; height:34px; border-radius:50%; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:14px;
+    transition:.2s; flex-shrink:0;
+  }
+  .tg-send:hover{ background:#9585ff; }
+  .tg-send:active{ transform:scale(0.95); }
 
-  /* ── Right panel ── */
   .info-panel{ display:flex; flex-direction:column; gap:12px; }
   .info-card{
     background:var(--surface); border:1px solid var(--border);
@@ -163,12 +216,11 @@
   .info-card p{ color:var(--muted); font-size:13px; line-height:1.65; }
 
   .feature-list{ display:flex; flex-direction:column; gap:6px; }
-  .feat{
-    display:flex; align-items:flex-start; gap:8px; font-size:12.5px; line-height:1.5;
-  }
+  .feat{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; line-height:1.5; }
   .feat-dot{ color:var(--accent2); font-size:11px; margin-top:2px; flex-shrink:0; }
   .feat span{ color:var(--muted); }
   .feat strong{ color:var(--text); font-weight:500; }
+  .feat-note{ color:var(--muted); font-size:11.5px; margin-top:8px; line-height:1.55; font-style:italic; }
 
   .stat-row{
     display:flex; justify-content:space-between; align-items:center;
@@ -178,13 +230,6 @@
   .stat-row .k{ font-family:'JetBrains Mono',monospace; color:var(--muted); }
   .stat-row .v{ color:var(--accent2); font-family:'JetBrains Mono',monospace; }
 
-  /* storage bar */
-  .storage-bar-wrap{ margin-top:10px; }
-  .storage-label{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:5px; }
-  .storage-bar{ height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
-  .storage-fill{ height:100%; width:31%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; }
-
-  /* tag pills */
   .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
   .tag{
     font-family:'JetBrains Mono',monospace; font-size:10px;
@@ -203,183 +248,518 @@
 <body>
 
 <div class="topbar">
-  <a class="back" href="index.html">← back</a>
-  <a class="repo-link" href="https://github.com/jishnuharis/StormDrive" target="_blank">→ github.com/jishnuharis/StormDrive</a>
+  <a class="back" href="index.html">← Back</a>
+  <a class="repo-link" href="https://github.com/jishnuharis/StormDrive" target="_blank">→ Github</a>
 </div>
 
 <header>
   <div class="eyebrow">infrastructure · storage · bot</div>
   <h1>StormDrive</h1>
   <p class="sub">
-    A private file vault running entirely inside <em>Telegram</em> — unlimited storage with no hosting fees.
-    Full folder tree, search, favourites, move/copy/rename, per-file metadata, and atomic writes
-    with <em>5 rolling backups</em>.
+    A <em>single-user</em> private archive bot living entirely inside Telegram, built for one person to
+    store, browse, and organize files with zero hosting fees. Almost everything is driven by tappable
+    inline-keyboard menus rather than typed commands, with atomic writes, <em>5 rolling backups</em>,
+    and a guarded archive group that the bot auto-kicks any intruder by itself.
   </p>
 </header>
 
-<div class="demo-wrap">
+<div class="top-bar">
+  <button class="tab-btn active" data-tab="demo">▸ Live Demo</button>
+  <button class="tab-btn" data-tab="story">▸ How I Built It</button>
+</div>
 
-  <!-- Left: Telegram chat mockup -->
-  <div class="shell">
-    <div class="chrome-bar">
-      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-      <span class="chrome-title">Telegram — StormDrive</span>
+<div class="tab-panel active" id="panel-demo">
+  <div class="demo-wrap">
+
+    <div class="shell">
+      <div class="chrome-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="chrome-title">Telegram — StormDrive [DEMO]</span>
+      </div>
+      <div class="tg-header">
+        <div class="tg-avatar">⚡</div>
+        <div class="tg-info">
+          <div class="tg-name">StormDrive</div>
+          <div class="tg-status">● online · owner-only</div>
+        </div>
+      </div>
+      <div class="chat-body" id="chatBody"></div>
+      <div class="tg-input">
+        <input type="text" id="chatInput" placeholder="Type a command (/menu, /search, /stats…)" maxlength="200" />
+        <button class="tg-send" id="sendBtn">➤</button>
+      </div>
     </div>
-    <div class="tg-header">
-      <div class="tg-avatar">⚡</div>
-      <div class="tg-info">
-        <div class="tg-name">StormDrive <span style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--accent);background:rgba(124,106,247,0.15);border:1px solid rgba(124,106,247,0.3);padding:1px 5px;border-radius:2px;">BOT</span></div>
-        <div class="tg-status">● online</div>
-      </div>
-    </div>
-    <div class="chat-body">
 
-      <!-- ls command -->
-      <div class="msg-row out">
-        <div class="bubble out">
-          <span class="cmd">/ls</span> Projects/Backend
-          <div class="time">14:02</div>
+    <div class="info-panel">
+
+      <div class="info-card">
+        <div class="lbl">What it does</div>
+        <p>A private archive vault for exactly one person, every interaction checks against an owner ID and silently refuses anyone else. Browsing, renaming, moving, deleting, and favouriting all happen by tapping inline-keyboard buttons, not typing paths.</p>
+      </div>
+
+      <div class="info-card">
+        <div class="lbl">Command system</div>
+        <div class="feature-list">
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/start /menu</strong> <span>— open the main menu</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/search</strong> <span>— find a file by name</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/recent</strong> <span>— last 15 stored files</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/stats</strong> <span>— recursive file/folder breakdown</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/disk</strong> <span>— real-time disk usage report (shows the report as image in the newer version)</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/backup /restore</strong> <span>— export or reload the metadata DB</span></div></div>
+          <div class="feat"><span class="feat-dot">▸</span><div><strong>/joinme</strong> <span>— single-use invite to the guarded archive group</span></div></div>
         </div>
+        <div class="feat-note">Everything else, browse, store, rename, move, delete, favourite, is menu-driven. Tap the buttons below the bot's messages, just like in the real bot.</div>
       </div>
 
-      <div class="msg-row">
-        <div class="bubble bot">
-          <div class="bname">StormDrive</div>
-          📂 <span class="val">Projects/Backend</span> — 4 items
-          <div class="folder-list">
-            <div class="folder-item"><span class="fi-icon">📁</span><span class="fi-name">api-server/</span><span class="fi-size">12 files</span></div>
-            <div class="folder-item"><span class="fi-icon">📁</span><span class="fi-name">db-migrations/</span><span class="fi-size">8 files</span></div>
-            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">schema.sql</span><span class="fi-size">44 KB</span></div>
-            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">README.md</span><span class="fi-size">3.2 KB</span></div>
-          </div>
-          <div class="time">14:02</div>
-        </div>
-      </div>
-
-      <!-- upload -->
-      <div class="msg-row out">
-        <div class="bubble out">
-          <div class="file-bubble">
-            <div class="file-icon">🗜️</div>
-            <div class="file-meta">
-              <div class="file-name">production-backup-2024.tar.gz</div>
-              <div class="file-size">1.2 GB</div>
-            </div>
-          </div>
-          <div class="time">14:03</div>
-        </div>
-      </div>
-
-      <div class="msg-row">
-        <div class="bubble bot">
-          <div class="bname">StormDrive</div>
-          <span class="ok">✓ Uploaded</span> → <span class="val">Projects/Backend/</span><br/>
-          <span class="dim">Metadata saved · Backup #3 rotated</span>
-          <div class="time">14:03</div>
-        </div>
-      </div>
-
-      <!-- search -->
-      <div class="msg-row out">
-        <div class="bubble out">
-          <span class="cmd">/search</span> schema
-          <div class="time">14:05</div>
-        </div>
-      </div>
-
-      <div class="msg-row">
-        <div class="bubble bot">
-          <div class="bname">StormDrive</div>
-          🔍 Found <span class="val">3</span> results:
-          <div class="folder-list">
-            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">Projects/Backend/schema.sql</span></div>
-            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">Archive/2023/db-schema-v2.sql</span></div>
-            <div class="folder-item"><span class="fi-icon">📄</span><span class="fi-name">Docs/schema-reference.pdf</span></div>
-          </div>
-          <div class="time">14:05</div>
-        </div>
-      </div>
-
-      <!-- move -->
-      <div class="msg-row out">
-        <div class="bubble out">
-          <span class="cmd">/move</span> Docs/schema-reference.pdf Projects/Backend/
-          <div class="time">14:06</div>
-        </div>
-      </div>
-
-      <div class="msg-row">
-        <div class="bubble bot">
-          <div class="bname">StormDrive</div>
-          <span class="ok">✓ Moved</span> <span class="val">schema-reference.pdf</span><br/>
-          <span class="dim">Docs/ → Projects/Backend/</span>
-          <div class="time">14:06</div>
-        </div>
-      </div>
-
-      <!-- favourites -->
-      <div class="msg-row out">
-        <div class="bubble out">
-          <span class="cmd">/fav</span> Projects/Backend/schema.sql
-          <div class="time">14:07</div>
-        </div>
-      </div>
-
-      <div class="msg-row">
-        <div class="bubble bot">
-          <div class="bname">StormDrive</div>
-          ⭐ <span class="ok">Starred</span> <span class="val">schema.sql</span>
-          <div class="time">14:07</div>
+      <div class="info-card">
+        <div class="lbl">System stats</div>
+        <div class="stat-row"><span class="k">lines of code</span><span class="v">3,000+</span></div>
+        <div class="stat-row"><span class="k">git commits</span><span class="v">67</span></div>
+        <div class="stat-row"><span class="k">status</span><span class="v">online</span></div>
+        <div class="stat-row"><span class="k">rolling backups</span><span class="v">5 per save</span></div>
+        <div class="stat-row"><span class="k">write safety</span><span class="v">atomic</span></div>
+        <div class="tags">
+          <span class="tag">Python</span>
+          <span class="tag">Telegram API</span>
+          <span class="tag">UI Design</span>
+          <span class="tag">JSON Storage</span>
         </div>
       </div>
 
     </div>
   </div>
+</div>
 
-  <!-- Right: Info cards -->
-  <div class="info-panel">
+<div class="tab-panel" id="panel-story">
+  <div class="story-card">
+    <h2>The idea</h2>
+    <p><t>I wanted a private place to dump files without paying for cloud storage or trusting a third-party service with my stuff. Most self-hosted solutions are overkill, servers, databases, web UIs, when all I really needed was something I already had open all day: Telegram. So I built a bot that lives entirely inside a single chat, where I can store, browse, and retrieve anything through tappable menus instead of typing paths or opening a browser.</p>
 
-    <div class="info-card">
-      <div class="lbl">What it does</div>
-      <p>Turns Telegram's unlimited media storage into a personal cloud drive — fully navigable with folders, metadata, search, and backups. No external storage costs, no size limits.</p>
-      <div class="storage-bar-wrap">
-        <div class="storage-label"><span>Used</span><span>~847 GB of ∞</span></div>
-        <div class="storage-bar"><div class="storage-fill"></div></div>
-      </div>
-    </div>
+    <h2>Architecture</h2>
+    <p><t>The bot is built on <span class="val">python-telegram-bot v20+</span> with a fully async handler setup. Files aren't stored on any server, they go straight into a private Telegram archive group, and the bot keeps a local <span class="val">JSON metadata database</span> that maps every file to its Telegram file ID, folder path, type, and size. All writes are atomic with <span class="val">5 rolling backups</span>, so a corrupt write never destroys the whole index. The archive group itself is guarded, the bot auto-kicks anyone who isn't the owner the moment they join and notifies the owner about the intruder, so there's no risk of accidentally exposing files by sharing a link. The <span class="cmd">/disk</span> generates a report of the current state of the bot will all the file details globally and sends it as an image to make it more readable. A Flask keep-alive server runs alongside it so the bot doesn't get spun down on when it's on idle mode.</p>
 
-    <div class="info-card">
-      <div class="lbl">Commands</div>
-      <div class="feature-list">
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/ls [path]</strong> <span>— list folder contents</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/search [query]</strong> <span>— full-drive search</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/move /copy /rename</strong> <span>— file operations</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/fav</strong> <span>— star files for quick access</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/recent</strong> <span>— recently touched files</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/meta</strong> <span>— per-file metadata viewer</span></div></div>
-        <div class="feat"><span class="feat-dot">▸</span><div><strong>/mkdir /rm</strong> <span>— create / delete</span></div></div>
-      </div>
-    </div>
+    <h2>Challenges</h2>
+    <p><t>The trickiest part was making the whole thing feel like a real file manager without a real UI. Every screen, browsing folders, viewing file options, moving files, had to be built entirely from Telegram's inline keyboard buttons, with the bot editing its own previous message instead of flooding the chat with new ones. Getting that edit-in-place behaviour right took careful state threading: every button's <span class="val">onClick</span> closure needs to carry the right folder path and file ID forward, and Telegram has strict rate limits on how fast you can call <span class="val">editMessageReplyMarkup</span>. Atomic writes were another one, JSON isn't a database, so I had to write to a temp file and rename it over the original to make sure a crash mid-write never leaves a half-written index behind.</p>
 
-    <div class="info-card">
-      <div class="lbl">System stats</div>
-      <div class="stat-row"><span class="k">lines of code</span><span class="v">3,378</span></div>
-      <div class="stat-row"><span class="k">git commits</span><span class="v">67</span></div>
-      <div class="stat-row"><span class="k">deployment</span><span class="v">Dockerized</span></div>
-      <div class="stat-row"><span class="k">rolling backups</span><span class="v">5 per file</span></div>
-      <div class="stat-row"><span class="k">write safety</span><span class="v">atomic</span></div>
-      <div class="tags">
-        <span class="tag">Python</span>
-        <span class="tag">Telegram API</span>
-        <span class="tag">Docker</span>
-        <span class="tag">JSON storage</span>
-      </div>
-    </div>
-
+    <h2>What I'd improve</h2>
+    <p><t>Right now the metadata database is a flat JSON file, which is fine for hundreds of files but would slow down noticeably at tens of thousands. Switching to <span class="val">SQLite</span> would fix that and also make search much faster than the current linear scan. I'd also like to add tag support, right now organisation is purely folder-based, but being able to tag files and filter by tag would make retrieval a lot more flexible. Longer term, I want to add a <span class="cmd">/share</span> command that generates a time-limited link to a single file without exposing the archive group itself.<br><br><span class="ok">NOTE:</span> <span class="val">I'm planning to make this bot available for anyone who wants this same bot exclusively for themselves, so if you want one for yourselves, just contact me and we can discuss our needs.</span></p>
   </div>
 </div>
 
 <footer class="page-footer">StormDrive · built by JishnuHaris</footer>
 
+<script>
+const body = document.getElementById('chatBody');
+const input = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+
+function now(){ const d=new Date(); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+function scrollDown(){ setTimeout(()=>{ body.scrollTop = body.scrollHeight; }, 20); }
+
+// ── fake data store ───────────────────────────────────────────────────────
+const folderTree = {
+  'Root': ['Projects','Photos','Documents'],
+  'Root/Projects': ['Backend'],
+  'Root/Projects/Backend': [],
+  'Root/Photos': [],
+  'Root/Documents': [],
+};
+const folderFileCounts = { 'Root/Photos':84, 'Root/Documents':39 };
+let files = {
+  'Root': [ {id:1,name:'invoice_template.docx',type:'document',size:'88 KB',fav:false} ],
+  'Root/Projects/Backend': [
+    {id:2,name:'schema.sql',type:'code',size:'44 KB',fav:true},
+    {id:3,name:'README.md',type:'document',size:'3.2 KB',fav:false},
+    {id:4,name:'production-backup-2024.tar.gz',type:'archive',size:'1.2 GB',fav:false},
+    {id:5,name:'deploy-notes.txt',type:'document',size:'1.1 KB',fav:false},
+  ],
+};
+let nextId = 6;
+let state = { pendingAction:null };
+
+// ── globalBub — the one persistent bot message ────────────────────────────
+let globalBub = null;
+
+function typeEmoji(t){ return {document:'📄',code:'🧩',archive:'🗂️',image:'🖼️',video:'🎬',audio:'🎵'}[t] || '📄'; }
+function breadcrumb(p){ return p.replace(/\//g,' › '); }
+function parentPath(p){ if(p==='Root') return 'Root'; const parts=p.split('/'); parts.pop(); return parts.join('/'); }
+function totalInTree(path){
+  let total = files[path] ? files[path].length : (folderFileCounts[path]||0);
+  for (const s of (folderTree[path]||[])) total += totalInTree(path+'/'+s);
+  return total;
+}
+function findFile(id){ for(const p in files){ const f=files[p].find(x=>x.id===id); if(f) return {f,p}; } return null; }
+function guessType(name){
+  const ext = name.split('.').pop().toLowerCase();
+  const map = {sql:'code',js:'code',py:'code',md:'document',pdf:'document',docx:'document',txt:'document',zip:'archive',tar:'archive',gz:'archive',png:'image',jpg:'image',jpeg:'image',mp4:'video',mp3:'audio'};
+  return map[ext] || 'document';
+}
+
+// ── rendering ─────────────────────────────────────────────────────────────
+function addUser(text){
+  const row=document.createElement('div'); row.className='msg-row out';
+  const av=document.createElement('div'); av.className='msg-avatar'; av.style.background='#5a50cc'; av.textContent='Y';
+  const bub=document.createElement('div'); bub.className='bubble out';
+  bub.innerHTML = `${escapeHtml(text)}<div class="time">${now()} <span style="color:var(--accent2)">✓✓</span></div>`;
+  row.appendChild(bub); row.appendChild(av);
+  body.appendChild(row); scrollDown();
+}
+
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function buildKbDom(rows){
+  if (!rows || !rows.length) return null;
+  const kb=document.createElement('div'); kb.className='tg-keyboard';
+  rows.forEach(r=>{
+    const kbRow=document.createElement('div'); kbRow.className='tg-kb-row';
+    r.forEach(btn=>{
+      const b=document.createElement('button'); b.className='tg-kb-btn'; b.innerHTML=btn.label;
+      b.onclick=btn.onClick; kbRow.appendChild(b);
+    });
+    kb.appendChild(kbRow);
+  });
+  return kb;
+}
+
+// Creates a brand-new bot message row, returns the bubble element.
+function addBotKB(text, rows){
+  const row=document.createElement('div'); row.className='msg-row';
+  const av=document.createElement('div'); av.className='msg-avatar'; av.style.background='linear-gradient(135deg,var(--accent),#5a48cc)'; av.textContent='⚡';
+  const bub=document.createElement('div'); bub.className='bubble bot';
+  const bname=document.createElement('div'); bname.className='bname'; bname.textContent='StormDrive';
+  bub.appendChild(bname);
+  const txt=document.createElement('div'); txt.innerHTML=text; bub.appendChild(txt);
+  const kb = buildKbDom(rows);
+  if (kb) bub.appendChild(kb);
+  const time=document.createElement('div'); time.className='time'; time.textContent=now();
+  bub.appendChild(time);
+  row.appendChild(av); row.appendChild(bub);
+  body.appendChild(row);
+  scrollDown();
+  return bub;
+}
+
+// Edits an existing bubble in-place.
+function editBotKB(bubbleEl, text, rows){
+  // preserve the name tag
+  const bname = bubbleEl.querySelector('.bname');
+  bubbleEl.innerHTML = '';
+  if (bname) bubbleEl.appendChild(bname);
+  else {
+    const b=document.createElement('div'); b.className='bname'; b.textContent='StormDrive';
+    bubbleEl.appendChild(b);
+  }
+  const txt=document.createElement('div'); txt.innerHTML=text; bubbleEl.appendChild(txt);
+  const kb = buildKbDom(rows);
+  if (kb) bubbleEl.appendChild(kb);
+  const time=document.createElement('div'); time.className='time'; time.textContent=now();
+  bubbleEl.appendChild(time);
+  scrollDown();
+}
+
+// Main helper — creates once, edits on every subsequent call.
+function botMsg(text, rows){
+  if (!globalBub) globalBub = addBotKB(text, rows);
+  else editBotKB(globalBub, text, rows);
+}
+
+function addFileBubble(f){
+  const row=document.createElement('div'); row.className='msg-row';
+  const av=document.createElement('div'); av.className='msg-avatar'; av.style.background='linear-gradient(135deg,var(--accent),#5a48cc)'; av.textContent='⚡';
+  const bub=document.createElement('div'); bub.className='bubble bot';
+  bub.innerHTML = `<div class="bname">StormDrive</div><div class="file-bubble"><div class="file-icon">${typeEmoji(f.type)}</div><div class="file-meta"><div class="file-name">${escapeHtml(f.name)}</div><div class="file-size">${f.size}</div></div></div><div class="time">${now()}</div>`;
+  row.appendChild(av); row.appendChild(bub);
+  body.appendChild(row); scrollDown();
+}
+
+function updatePlaceholder(){
+  const map = {rename:'Type new filename…', storeFile:'Type filename to "send"…', newFolder:'Type folder name…', search:'Type search query…'};
+  input.placeholder = state.pendingAction ? (map[state.pendingAction.type] || 'Type a value…') : 'Type a command (/menu, /search, /stats…)';
+}
+
+// ── screens ───────────────────────────────────────────────────────────────
+function showMainMenu(){
+  state = { pendingAction:null };
+  updatePlaceholder();
+  const total = totalInTree('Root');
+  botMsg(
+    `📦 <b>Archive Vault</b><br><br>`+
+    `📄 Files: <b>${total}</b><br>`+
+    `📁 Folders: <b>4</b><br><br>`+
+    `📂 One place for everything you want to keep.<br>`+
+    `🔐 Private Vault — owner only<br><br>`+
+    `Choose an action:`,
+    [
+      [{label:'⭐ Favourites', onClick:showFavourites},{label:'🔍 Search', onClick:promptSearch}],
+      [{label:'📋 Recent', onClick:showRecent},{label:'📂 Browse', onClick:()=>showBrowse('Root')}],
+      [{label:'📥 Store', onClick:()=>showStore('Root')},{label:'📊 Stats', onClick:showStats}],
+      [{label:'📦 Storage Explorer', onClick:showStorageExplorer}],
+      [{label:'💾 Disk Report', onClick:showDiskReport}],
+    ]
+  );
+}
+
+function showBrowse(path){
+  const subs = folderTree[path] || [];
+  const rows = subs.map(s=>{ const full=path+'/'+s; const n=totalInTree(full); return [{label:`📁 ${s} (${n})`, onClick:()=>showBrowse(full)}]; });
+  const fl = files[path] || [];
+  if (fl.length) rows.push([{label:`📄 View ${fl.length} file(s) here`, onClick:()=>showFileList(path)}]);
+  const nav=[]; if (path!=='Root') nav.push({label:'⬅ Back', onClick:()=>showBrowse(parentPath(path))});
+  nav.push({label:'🏠 Main Menu', onClick:showMainMenu});
+  rows.push(nav);
+  botMsg(`📁 <b>${breadcrumb(path)}</b><br><span class="dim">${fl.length} file(s) here · ${subs.length} subfolder(s)</span>`, rows);
+}
+
+function showFileList(path){
+  const fl = files[path] || [];
+  const rows = fl.map(f=>[{label:`${typeEmoji(f.type)} ${f.name}${f.fav?' ⭐':''}`, onClick:()=>showFileAction(f.id, path)}]);
+  rows.push([{label:'⬅ Back', onClick:()=>showBrowse(path)},{label:'🏠 Main Menu', onClick:showMainMenu}]);
+  botMsg(`📄 <b>${fl.length} file(s)</b> in ${breadcrumb(path)}<br>Tap a file for options:`, rows);
+}
+
+function showFileAction(id, path){
+  const {f} = findFile(id);
+  botMsg(
+    `${typeEmoji(f.type)} <b>${escapeHtml(f.name)}</b><br><span class="dim">${f.size} · ${breadcrumb(path)}</span>`,
+    [
+      [{label:'📤 Retrieve', onClick:()=>retrieveFile(id)}],
+      [{label:'✏️ Rename', onClick:()=>promptRename(id,path)},{label:'🔀 Move', onClick:()=>promptMove(id,path)}],
+      [{label: f.fav?'⭐ Unfavourite':'⭐ Favourite', onClick:()=>toggleFav(id,path)},{label:'📋 Duplicate', onClick:()=>duplicateFile(id,path)}],
+      [{label:'🗑 Delete', onClick:()=>confirmDelete(id,path)}],
+      [{label:'⬅ Back', onClick:()=>showFileList(path)},{label:'🏠 Main Menu', onClick:showMainMenu}],
+    ]
+  );
+}
+
+function retrieveFile(id){
+  const {f} = findFile(id);
+  addFileBubble(f);
+  // after sending the file card, update the persistent bubble with a confirmation
+  setTimeout(()=>{ botMsg(`<span class="ok">✓ Sent.</span>`, [[{label:'🏠 Main Menu', onClick:showMainMenu}]]); }, 350);
+}
+
+function promptRename(id, path){
+  state.pendingAction = {type:'rename', id, path}; updatePlaceholder();
+  botMsg(`✏️ Send the new filename:`, [[{label:'❌ Cancel', onClick:()=>{state.pendingAction=null; updatePlaceholder(); showFileAction(id,path);}}]]);
+}
+
+function promptMove(id, path){
+  const dests = Object.keys(folderTree).filter(p=>p!==path);
+  const rows = dests.map(d=>[{label:`📂 ${breadcrumb(d)}`, onClick:()=>moveFile(id,path,d)}]);
+  rows.push([{label:'❌ Cancel', onClick:()=>showFileAction(id,path)}]);
+  botMsg(`🔀 Move to which folder?`, rows);
+}
+
+function moveFile(id, from, to){
+  const idx = files[from].findIndex(x=>x.id===id);
+  const f = files[from].splice(idx,1)[0];
+  files[to] = files[to] || [];
+  files[to].push(f);
+  botMsg(`<span class="ok">✓ Moved</span> <b>${escapeHtml(f.name)}</b> → ${breadcrumb(to)}`, [[{label:'🏠 Main Menu', onClick:showMainMenu}]]);
+}
+
+function toggleFav(id, path){
+  const {f} = findFile(id);
+  f.fav = !f.fav;
+  botMsg(f.fav?`⭐ Added <b>${escapeHtml(f.name)}</b> to Favourites.`:`Removed <b>${escapeHtml(f.name)}</b> from Favourites.`, [[{label:'⬅ Back', onClick:()=>showFileAction(id,path)}]]);
+}
+
+function duplicateFile(id, path){
+  const {f} = findFile(id);
+  const copy = {...f, id: nextId++, name: f.name.replace(/(\.[^.]+)?$/, m=>` (1)${m}`)};
+  files[path].push(copy);
+  botMsg(`📋 Duplicated → <b>${escapeHtml(copy.name)}</b>`, [[{label:'🏠 Main Menu', onClick:showMainMenu}]]);
+}
+
+function confirmDelete(id, path){
+  const {f} = findFile(id);
+  botMsg(`🗑 Delete <b>${escapeHtml(f.name)}</b>? This can't be undone.`, [
+    [{label:'✅ Yes, delete', onClick:()=>doDelete(id,path)},{label:'❌ Cancel', onClick:()=>showFileAction(id,path)}]
+  ]);
+}
+
+function doDelete(id, path){
+  files[path] = files[path].filter(x=>x.id!==id);
+  botMsg(`🗑 <span style="color:var(--red)">Deleted.</span>`, [[{label:'🏠 Main Menu', onClick:showMainMenu}]]);
+}
+
+function showStore(path){
+  const subs = folderTree[path] || [];
+  const rows = subs.map(s=>{ const full=path+'/'+s; return [{label:`📁 ${s}`, onClick:()=>showStore(full)}]; });
+  rows.push([{label:'📥 Store here', onClick:()=>beginStoreHere(path)}]);
+  rows.push([{label:'➕ New Folder', onClick:()=>promptNewFolder(path)}]);
+  const nav=[]; if(path!=='Root') nav.push({label:'⬅ Back', onClick:()=>showStore(parentPath(path))});
+  nav.push({label:'🏠 Main Menu', onClick:showMainMenu});
+  rows.push(nav);
+  botMsg(`📥 <b>Store mode</b><br>${breadcrumb(path)}<br><span class="dim">Navigate to a folder, then tap "Store here".</span>`, rows);
+}
+
+function beginStoreHere(path){
+  state.pendingAction = {type:'storeFile', path}; updatePlaceholder();
+  botMsg(`📥 Storing into <b>${breadcrumb(path)}</b>.<br>Now send a file — type a filename below to simulate it:`, [[{label:'❌ Done', onClick:()=>{state.pendingAction=null; updatePlaceholder(); showMainMenu();}}]]);
+}
+
+function promptNewFolder(path){
+  state.pendingAction = {type:'newFolder', path}; updatePlaceholder();
+  botMsg(`➕ Send the new folder's name:`, [[{label:'❌ Cancel', onClick:()=>{state.pendingAction=null; updatePlaceholder(); showStore(path);}}]]);
+}
+
+function showRecent(){
+  const all=[]; for(const p in files) for(const f of files[p]) all.push({...f, path:p});
+  all.sort((a,b)=>b.id-a.id);
+  const recent = all.slice(0,15);
+  const rows = recent.map(f=>[{label:`${typeEmoji(f.type)} ${f.name}`, onClick:()=>showFileAction(f.id,f.path)}]);
+  rows.push([{label:'🏠 Main Menu', onClick:showMainMenu}]);
+  botMsg(`📋 <b>Recent files</b> (last ${recent.length}):`, rows);
+}
+
+function showFavourites(){
+  const favs=[]; for(const p in files) for(const f of files[p]) if(f.fav) favs.push({...f, path:p});
+  if(!favs.length){ botMsg('⭐ No favourites yet.', [[{label:'🏠 Main Menu', onClick:showMainMenu}]]); return; }
+  const rows = favs.map(f=>[{label:`${typeEmoji(f.type)} ${f.name}`, onClick:()=>showFileAction(f.id,f.path)}]);
+  rows.push([{label:'🏠 Main Menu', onClick:showMainMenu}]);
+  botMsg(`⭐ <b>Favourites</b>`, rows);
+}
+
+function promptSearch(){
+  state.pendingAction = {type:'search'}; updatePlaceholder();
+  botMsg(`🔍 <b>Search</b><br>Type the filename (or part of it):`, [[{label:'❌ Cancel', onClick:()=>{state.pendingAction=null; updatePlaceholder(); showMainMenu();}}]]);
+}
+
+function runSearch(q){
+  const results=[];
+  for(const p in files) for(const f of files[p]) if(f.name.toLowerCase().includes(q.toLowerCase())) results.push({...f, path:p});
+  if(!results.length){ botMsg(`🔍 No files found matching <b>${escapeHtml(q)}</b>.`, [[{label:'🔍 Search again', onClick:promptSearch},{label:'🏠 Main Menu', onClick:showMainMenu}]]); return; }
+  const rows = results.map(r=>[{label:`${typeEmoji(r.type)} ${r.name}`, onClick:()=>showFileAction(r.id, r.path)}]);
+  rows.push([{label:'🏠 Main Menu', onClick:showMainMenu}]);
+  botMsg(`🔍 <b>${results.length} result(s)</b> for <i>${escapeHtml(q)}</i>`, rows);
+}
+
+function showStats(){
+  const totalRoot = files['Root'].length;
+  const totalBackend = files['Root/Projects/Backend'].length;
+  const total = totalInTree('Root');
+  botMsg(
+    `📊 <b>Archive Statistics</b><br><br>`+
+    `Total: <b>${total}</b> files in <b>4</b> folder(s)<br><br>`+
+    `📁 <b>Projects</b>: 0 file(s) (${totalBackend} total)<br>`+
+    `&nbsp;&nbsp;📁 <b>Backend</b>: ${totalBackend} file(s)<br>`+
+    `📁 <b>Photos</b>: 84 file(s)<br>`+
+    `📁 <b>Documents</b>: 39 file(s)<br>`+
+    `📂 Root: ${totalRoot} file(s)`,
+    [[{label:'🏠 Main Menu', onClick:showMainMenu}]]
+  );
+}
+
+function showStorageExplorer(){
+  botMsg(
+    `📦 <b>Storage Explorer</b><br><br>`+
+    `🗂️ Archives: <b>1.2 GB</b><br>`+
+    `🧩 Code: <b>47 KB</b><br>`+
+    `📄 Documents: <b>92 KB</b><br>`+
+    `🖼️ Images: <span class="dim">—</span><br>`+
+    `🎬 Video: <span class="dim">—</span>`,
+    [[{label:'🏠 Main Menu', onClick:showMainMenu}]]
+  );
+}
+
+function showDiskReport(){
+  botMsg(
+    `💾 <b>Disk Report</b><br><br>`+
+    `Used: <b>12.4 GB</b> / 50 GB<br>`+
+    `Free: <b>37.6 GB</b><br>`+
+    `Metadata DB: <b>412 KB</b>`,
+    [[{label:'🏠 Main Menu', onClick:showMainMenu}]]
+  );
+}
+
+function showJoinMe(){
+  botMsg(`🔗 Single-use invite link generated.<br><span class="dim">The archive group auto-kicks anyone who isn't the owner.</span>`, [[{label:'🏠 Main Menu', onClick:showMainMenu}]]);
+}
+
+function showBackup(){
+  botMsg(`💾 Sending <b>metadata.json</b>…`, []);
+  setTimeout(()=>{ addFileBubble({name:'metadata.json', type:'code', size:'412 KB'}); }, 400);
+}
+
+function showRestore(){
+  botMsg(`♻️ Reply to a <b>.json</b> backup file with /restore to reload the database.<br><span class="dim">(File replies aren't simulated in this demo.)</span>`, [[{label:'🏠 Main Menu', onClick:showMainMenu}]]);
+}
+
+function showHelp(){
+  botMsg(
+    `📖 <b>Archive Bot — Help</b><br><br>`+
+    `<b>Real commands:</b> /start /menu /cancel /recent /stats /search /joinme /backup /restore /disk /help<br><br>`+
+    `<b>Everything else</b> — store, retrieve, rename, move, delete, favourite — is driven by the buttons under each message, same as in the real bot.`,
+    [[{label:'🏠 Main Menu', onClick:showMainMenu}]]
+  );
+}
+
+// ── input routing ─────────────────────────────────────────────────────────
+function routeInput(val){
+  if (state.pendingAction){ handlePending(val); return; }
+  if (val.startsWith('/')) { handleSlash(val); return; }
+  botMsg(`This bot works through buttons mostly — try /menu for the main menu, or /help for the command list.`, []);
+}
+
+function handlePending(val){
+  const pa = state.pendingAction; state.pendingAction = null; updatePlaceholder();
+  if (pa.type === 'rename'){
+    const {f} = findFile(pa.id); const old = f.name; f.name = val;
+    botMsg(`✏️ Renamed <b>${escapeHtml(old)}</b> → <b>${escapeHtml(val)}</b>`, [[{label:'🏠 Main Menu', onClick:showMainMenu}]]);
+  } else if (pa.type === 'storeFile'){
+    const f = {id:nextId++, name:val, type:guessType(val), size:(Math.random()*40+1).toFixed(1)+' MB', fav:false};
+    files[pa.path] = files[pa.path] || [];
+    files[pa.path].push(f);
+    botMsg(`<span class="ok">✓ Stored</span> <b>${escapeHtml(val)}</b> in ${breadcrumb(pa.path)}.<br>Send another file, or:`, [[{label:'❌ Done', onClick:showMainMenu}]]);
+    state.pendingAction = {type:'storeFile', path:pa.path}; updatePlaceholder();
+  } else if (pa.type === 'newFolder'){
+    folderTree[pa.path] = folderTree[pa.path] || [];
+    folderTree[pa.path].push(val);
+    folderTree[pa.path+'/'+val] = [];
+    botMsg(`<span class="ok">✓ Created folder</span> <b>${escapeHtml(val)}</b>`, [[{label:'📂 Open it', onClick:()=>showStore(pa.path+'/'+val)},{label:'🏠 Main Menu', onClick:showMainMenu}]]);
+  } else if (pa.type === 'search'){
+    runSearch(val);
+  }
+}
+
+function handleSlash(val) {
+  globalBub = null;
+  const c = val.split(/\s+/)[0].toLowerCase();
+  if (c==='/start'||c==='/menu') showMainMenu();
+  else if (c==='/cancel'){ botMsg('❌ Cancelled.', [[{label:'🏠 Main Menu', onClick:showMainMenu}]]); }
+  else if (c==='/recent') showRecent();
+  else if (c==='/stats') showStats();
+  else if (c==='/search') promptSearch();
+  else if (c==='/help') showHelp();
+  else if (c==='/joinme') showJoinMe();
+  else if (c==='/backup') showBackup();
+  else if (c==='/restore') showRestore();
+  else if (c==='/disk') showDiskReport();
+  else botMsg(`Unknown command. Try /help for the list.`, []);
+}
+
+function send(){
+  const val = input.value.trim();
+  if(!val) return;
+  input.value = '';
+  addUser(val);
+  setTimeout(()=>{ routeInput(val); }, 150);
+}
+sendBtn.addEventListener('click', send);
+input.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+
+// boot
+setTimeout(showMainMenu, 500);
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
 </body>
 </html>
